@@ -88,6 +88,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.tasks.compose.TaskListScreen
 import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
@@ -105,7 +106,7 @@ fun AllNotesPage(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
-    var isGalleryMode by rememberSaveable { mutableStateOf(false) }
+    var isTasksMode by rememberSaveable { mutableStateOf(false) }
 
     val sortTime by SharedPreferencesUtils.sortTime.collectAsState(SortTime.UPDATE_TIME_DESC)
     var lastScrolledSortTime by rememberSaveable { mutableStateOf<SortTime?>(null) }
@@ -131,26 +132,28 @@ fun AllNotesPage(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 HomeTabTitle(
-                    selected = !isGalleryMode,
+                    selected = !isTasksMode,
                     text = "Notes",
-                    onClick = { isGalleryMode = false }
+                    onClick = { isTasksMode = false }
                 )
                 HomeTabTitle(
-                    selected = isGalleryMode,
-                    text = "Gallery",
-                    onClick = { isGalleryMode = true }
+                    selected = isTasksMode,
+                    text = "Tasks",
+                    onClick = { isTasksMode = true }
                 )
             }
         },
         actions = {
-            Toolbar(navController, dateRangeBlock = {
-                showDateRangePicker = true
-            }, onSortChanged = {
-                scrollToTop(coroutineScope, listState)
-            })
+            if (!isTasksMode) {
+                Toolbar(navController, dateRangeBlock = {
+                    showDateRangePicker = true
+                }, onSortChanged = {
+                    scrollToTop(coroutineScope, listState)
+                })
+            }
         },
         floatingActionButton = {
-            if (!showInputDialog) {
+            if (!showInputDialog && !isTasksMode) {
                 FloatingActionButton(onClick = {
                     hideBottomNavBar.invoke(true)
                     parentNoteForComment = null
@@ -165,25 +168,8 @@ fun AllNotesPage(
         content = {
 
             Box {
-                if (isGalleryMode) {
-                    val galleryNotes = remember(noteState.notes) {
-                        noteState.notes.filter { it.note.attachments.isNotEmpty() }
-                    }
-                    LazyVerticalStaggeredGrid(
-                        columns = StaggeredGridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 8.dp)
-                    ) {
-                        items(galleryNotes) { noteBean ->
-                            GalleryItem(noteBean) {
-                                navController.navigate(Screen.MemoPreview(noteBean.note.noteId))
-                            }
-                        }
-                        item {
-                            Spacer(modifier = Modifier.height(100.dp))
-                        }
-                    }
+                if (isTasksMode) {
+                    TaskListScreen()
                 } else {
                     LazyColumn(
                         state = listState,

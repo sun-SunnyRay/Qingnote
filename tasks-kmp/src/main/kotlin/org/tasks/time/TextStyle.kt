@@ -1,0 +1,5 @@
+package org.tasks.time
+
+enum class TextStyle {
+    FULL, SHORT, NARROW
+}

@@ -58,5 +58,8 @@ sealed class Screen {
     object DonatePage : Screen()
 
     @Serializable
+    object TaskSettings : Screen()
+
+    @Serializable
     data class CommentList(val parentNoteId: Long) : Screen()
 }

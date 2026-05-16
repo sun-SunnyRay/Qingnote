@@ -17,16 +17,10 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Fingerprint
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Label
-import androidx.compose.material.icons.outlined.LocalCafe
-import androidx.compose.material.icons.outlined.Photo
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Translate
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,7 +31,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
@@ -52,21 +45,15 @@ import androidx.navigation.NavHostController
 import com.google.android.material.color.DynamicColors
 import com.qingguang.qingnote.R
 import com.qingguang.qingnote.component.ItemPopup
-import com.qingguang.qingnote.component.LoadingComponent
 import com.qingguang.qingnote.ui.page.LocalMemosState
 import com.qingguang.qingnote.ui.page.LocalTags
-import com.qingguang.qingnote.ui.page.data.DataManagerViewModel
 import com.qingguang.qingnote.ui.page.main.MainActivity
 import com.qingguang.qingnote.ui.page.router.Screen
-import com.qingguang.qingnote.utils.Constant
-import com.qingguang.qingnote.utils.DonateUtils
 import com.qingguang.qingnote.utils.LanguageUtils
 import com.qingguang.qingnote.utils.SettingsPreferences
-import com.qingguang.qingnote.utils.openUrl
 import com.qingguang.qingnote.utils.str
 import com.qingguang.qingnote.utils.toYYMMDD
 import com.moriafly.salt.ui.Item
-import com.moriafly.salt.ui.ItemArrowType
 import com.moriafly.salt.ui.ItemSwitcher
 import com.moriafly.salt.ui.ItemTitle
 import com.moriafly.salt.ui.RoundedColumn
@@ -109,8 +96,6 @@ data class SettingsBean(val title: Int, val imageVector: ImageVector, val onClic
 @OptIn(UnstableSaltApi::class)
 @Composable
 fun SettingsPreferenceScreen(navController: NavHostController) {
-    val dataViewModel = hiltViewModel<DataManagerViewModel>()
-
     val context = LocalContext.current
     val themeModePopupMenuState = rememberPopupState()
     val languagePopupMenuState = rememberPopupState()
@@ -119,29 +104,12 @@ fun SettingsPreferenceScreen(navController: NavHostController) {
     val dynamicColor by SettingsPreferences.dynamicColor.collectAsState(false)
     val themeMode by SettingsPreferences.themeMode.collectAsState(SettingsPreferences.ThemeMode.SYSTEM)
     val scope = rememberCoroutineScope()
-    var downloadDialogVisible by remember { mutableStateOf(false) }
-
-    var isLoading by remember { mutableStateOf(false) }
-    var isSuccess by remember { mutableStateOf(false) }
 
     val settingList = listOf(
         SettingsBean(
             R.string.random_walk,
             Icons.Outlined.Explore
         ) { navController.navigate(Screen.RandomWalk) },
-        SettingsBean(
-            R.string.gallery,
-            Icons.Outlined.Photo
-        ) { navController.navigate(Screen.Gallery) },
-    )
-
-    LoadingComponent(
-        isLoading = isLoading,
-        isSuccess = isSuccess,
-        onFinished = {
-            isLoading = false
-            isSuccess = false
-        }
     )
 
     LazyColumn(
@@ -260,6 +228,13 @@ fun SettingsPreferenceScreen(navController: NavHostController) {
                         text = R.string.local_data_manager.str,
                         iconPainter = rememberVectorPainter(ImageVector.vectorResource(R.drawable.ic_database))
                     )
+                    Item(
+                        onClick = {
+                            navController.navigate(Screen.TaskSettings)
+                        },
+                        text = "任务设置",
+                        iconPainter = rememberVectorPainter(Icons.Outlined.CheckCircle),
+                    )
 
                     settingList.forEachIndexed { index, it ->
                         Item(
@@ -271,69 +246,15 @@ fun SettingsPreferenceScreen(navController: NavHostController) {
                         )
                     }
 
-                    Item(
-                        onClick = {
-                            scope.launch {
-                                isLoading = true
-                                isSuccess = false
-                                dataViewModel.fixTag()
-                                isSuccess = true
-                                isLoading = false
-                            }
-                        },
-                        text = R.string.tag_fix.str,
-                        iconPainter = rememberVectorPainter(Icons.Outlined.Label),
-                    )
-
                 }
             }
 
-            item {
-                RoundedColumn {
-                    ItemTitle(text = stringResource(R.string.other))
-                    Item(
-                        onClick = {
-                            navController.navigate(Screen.DonatePage)
-                        },
-                        text = R.string.donate_app.str,
-                        iconPainter = rememberVectorPainter(Icons.Outlined.LocalCafe),
-                    )
-                    Item(
-                        onClick = {
-                            downloadDialogVisible = true
-                        },
-                        text = R.string.new_version.str,
-                        iconPainter = rememberVectorPainter(Icons.Outlined.Download),
-                    )
-                    Item(
-                        onClick = {
-                            context.openUrl("https://xhslink.com/m/6eJ9xE368Ja")
-                        },
-                        text = R.string.xiaohongshu.str,
-                        iconPainter = painterResource(id = R.drawable.ic_xiaohongshu),
-                    )
-                    Item(
-                        onClick = {
-                            navController.navigate(Screen.MoreInfo) { launchSingleTop = true }
-                        },
-                        text = stringResource(id = R.string.other),
-                        iconPainter = rememberVectorPainter(image = Icons.Outlined.Info),
-                        iconColor = SaltTheme.colors.text,
-                        iconPaddingValues = PaddingValues(all = 1.5.dp)
-                    )
-                }
-            }
+
         })
 
 //    if (showWarnDialog) {
 //        TipsDialog(block = { showWarnDialog = false })
 //    }
-    // Show feedback dialog when feedbackDialogVisible is true
-    if (downloadDialogVisible) {
-        DownloadsDialog {
-            downloadDialogVisible = false
-        }
-    }
 }
 
 @Composable
@@ -388,42 +309,3 @@ private fun boxText(modifier: Modifier, title: String, desc: String) {
     }
 }
 
-
-@Composable
-fun DownloadsDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    AlertDialog(
-        containerColor = SaltTheme.colors.background,
-        onDismissRequest = { onDismiss() },
-        title = { Text(stringResource(R.string.new_version), color = SaltTheme.colors.text) },
-        text = {
-            Column {
-                Item(
-                    onClick = {
-                        Constant.startGithubReleaseUrl(context)
-                        onDismiss()
-                    },
-                    text = R.string.github.str,
-                    arrowType = ItemArrowType.Arrow
-                )
-                Item(
-                    onClick = {
-                        DonateUtils.openGooglePlay(
-                            context
-                        )
-                        onDismiss()
-                    },
-                    text = "Google Play",
-                    arrowType = ItemArrowType.Arrow
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                onDismiss()
-            }) {
-                com.moriafly.salt.ui.Text(R.string.cancel.str, color = Color.White)
-            }
-        }
-    )
-}

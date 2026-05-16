@@ -23,6 +23,9 @@ interface TaskAttachmentDao {
     @Query("SELECT * FROM attachment_file WHERE file_uuid = :remoteId")
     suspend fun getAttachment(remoteId: String): TaskAttachment?
 
+    @Query("SELECT COUNT(*) FROM attachment WHERE file_uuid = :remoteId")
+    suspend fun getAttachmentReferenceCount(remoteId: String): Int
+
     @Query("DELETE FROM attachment WHERE task = :taskId AND file_uuid = :attachment")
     suspend fun delete(taskId: Long, attachment: String)
 

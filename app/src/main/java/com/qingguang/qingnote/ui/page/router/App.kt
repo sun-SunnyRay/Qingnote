@@ -28,6 +28,7 @@ import com.qingguang.qingnote.ui.page.settings.DonatePage
 import com.qingguang.qingnote.ui.page.settings.ExplorePage
 import com.qingguang.qingnote.ui.page.settings.GalleryPage
 import com.qingguang.qingnote.ui.page.settings.MoreInfoPage
+import com.qingguang.qingnote.ui.page.settings.TaskSettingsPage
 import com.qingguang.qingnote.ui.page.share.SharePage
 import com.qingguang.qingnote.ui.page.tag.CommentListPage
 import com.qingguang.qingnote.ui.page.tag.DateRangePage
@@ -183,6 +184,10 @@ fun NavHostContainer(
 
         composable<Screen.DonatePage> {
             DonatePage(navController = navController)
+        }
+
+        composable<Screen.TaskSettings> {
+            TaskSettingsPage(navController = navController)
         }
 
         composable<Screen.CommentList> { navBackStackEntry ->

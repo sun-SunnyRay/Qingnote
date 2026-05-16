@@ -1,31 +1,45 @@
 package com.qingguang.qingnote.ui.page.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AvTimer
@@ -34,6 +48,10 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,6 +62,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -60,13 +80,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.qingguang.qingnote.R
@@ -78,17 +105,16 @@ import com.qingguang.qingnote.ui.page.LocalMemosState
 import com.qingguang.qingnote.ui.page.SortTime
 import com.qingguang.qingnote.ui.page.input.ChatInputDialog
 import com.qingguang.qingnote.ui.page.router.Screen
-import com.qingguang.qingnote.utils.FirstTimeWarmDialog
-import com.qingguang.qingnote.utils.SettingsPreferences
 import com.qingguang.qingnote.utils.SharedPreferencesUtils
-import com.qingguang.qingnote.utils.lunchMain
 import com.qingguang.qingnote.utils.str
 import com.moriafly.salt.ui.SaltTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.tasks.compose.TaskListScreen
+import com.qingguang.qingnote.tasks.ui.TaskListViewModel
+import com.qingguang.qingnote.tasks.ui.TasksHomeActions
+import com.qingguang.qingnote.tasks.ui.TasksHomeRoute
 import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
@@ -99,14 +125,15 @@ fun AllNotesPage(
     hideBottomNavBar: ((Boolean) -> Unit)
 ) {
     val noteState: NoteState = LocalMemosState.current
-    var showWarnDialog by rememberSaveable { mutableStateOf(false) }
     var showInputDialog by rememberSaveable { mutableStateOf(false) }
     var showDateRangePicker by rememberSaveable { mutableStateOf(false) }
     var parentNoteForComment by rememberSaveable { mutableStateOf<NoteShowBean?>(null) }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    val taskListViewModel: TaskListViewModel = hiltViewModel()
 
     var isTasksMode by rememberSaveable { mutableStateOf(false) }
+    val homePagerState = rememberPagerState(initialPage = if (isTasksMode) 1 else 0) { 2 }
 
     val sortTime by SharedPreferencesUtils.sortTime.collectAsState(SortTime.UPDATE_TIME_DESC)
     var lastScrolledSortTime by rememberSaveable { mutableStateOf<SortTime?>(null) }
@@ -120,8 +147,8 @@ fun AllNotesPage(
         }
     }
 
-    LaunchedEffect(Unit) {
-        showWarnDialog = SettingsPreferences.firstLaunch.first()
+    LaunchedEffect(homePagerState.currentPage) {
+        isTasksMode = homePagerState.currentPage == 1
     }
 
     RYScaffold(
@@ -134,12 +161,18 @@ fun AllNotesPage(
                 HomeTabTitle(
                     selected = !isTasksMode,
                     text = "Notes",
-                    onClick = { isTasksMode = false }
+                    onClick = {
+                        isTasksMode = false
+                        coroutineScope.launch { homePagerState.animateScrollToPage(0) }
+                    }
                 )
                 HomeTabTitle(
                     selected = isTasksMode,
                     text = "Tasks",
-                    onClick = { isTasksMode = true }
+                    onClick = {
+                        isTasksMode = true
+                        coroutineScope.launch { homePagerState.animateScrollToPage(1) }
+                    }
                 )
             }
         },
@@ -150,47 +183,80 @@ fun AllNotesPage(
                 }, onSortChanged = {
                     scrollToTop(coroutineScope, listState)
                 })
+            } else {
+                TasksHomeActions(
+                    viewModel = taskListViewModel,
+                    onSettingsClick = { navController.navigate(Screen.TaskSettings) },
+                )
             }
         },
         floatingActionButton = {
-            if (!showInputDialog && !isTasksMode) {
-                FloatingActionButton(onClick = {
-                    hideBottomNavBar.invoke(true)
-                    parentNoteForComment = null
-                    showInputDialog = true
-                }, modifier = Modifier.padding(end = 16.dp, bottom = 32.dp)) {
-                    Icon(
-                        Icons.Rounded.Edit, stringResource(R.string.edit)
-                    )
+            if (!showInputDialog) {
+                if (isTasksMode) {
+                    FloatingActionButton(
+                        onClick = { taskListViewModel.showCreateDialog() },
+                        modifier = Modifier.padding(end = 16.dp, bottom = 32.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = SaltTheme.colors.highlight.copy(alpha = 0.18f),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Edit,
+                            contentDescription = stringResource(R.string.edit),
+                            tint = SaltTheme.colors.highlight,
+                        )
+                    }
+                } else {
+                    FloatingActionButton(onClick = {
+                        hideBottomNavBar.invoke(true)
+                        parentNoteForComment = null
+                        showInputDialog = true
+                    }, modifier = Modifier.padding(end = 16.dp, bottom = 32.dp)) {
+                        Icon(
+                            Icons.Rounded.Edit, stringResource(R.string.edit)
+                        )
+                    }
                 }
             }
         },
         content = {
 
             Box {
-                if (isTasksMode) {
-                    TaskListScreen()
-                } else {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(
-                            count = noteState.notes.size,
-                            key = { noteState.notes[it].note.noteId }
-                        ) { index ->
-                            NoteCard(
-                                noteShowBean = noteState.notes[index],
-                                navHostController = navController,
-                                onCommentClick = {
-                                    parentNoteForComment = it
-                                    hideBottomNavBar.invoke(true)
-                                    showInputDialog = true
+                HorizontalPager(
+                    state = homePagerState,
+                    userScrollEnabled = !showInputDialog,
+                    modifier = Modifier.fillMaxSize(),
+                ) { page ->
+                    when (page) {
+                        0 -> {
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(
+                                    count = noteState.notes.size,
+                                    key = { noteState.notes[it].note.noteId }
+                                ) { index ->
+                                    NoteCard(
+                                        noteShowBean = noteState.notes[index],
+                                        navHostController = navController,
+                                        onCommentClick = {
+                                            parentNoteForComment = it
+                                            hideBottomNavBar.invoke(true)
+                                            showInputDialog = true
+                                        }
+                                    )
                                 }
-                            )
+                                item {
+                                    Spacer(modifier = Modifier.height(100.dp))
+                                }
+                            }
                         }
-                        item {
-                            Spacer(modifier = Modifier.height(100.dp))
+
+                        1 -> {
+                            TasksHomeRoute(
+                                viewModel = taskListViewModel,
+                                showFloatingActionButton = false,
+                            )
                         }
                     }
                 }
@@ -218,15 +284,6 @@ fun AllNotesPage(
         }
     )
 
-    if (showWarnDialog) {
-        FirstTimeWarmDialog {
-            lunchMain {
-                SettingsPreferences.changeFirstLaunch(false)
-                showWarnDialog = false
-            }
-        }
-    }
-
     if (showDateRangePicker) {
         ModernDateRangePicker(
             onDismissRequest = { showDateRangePicker = false },
@@ -241,7 +298,6 @@ fun AllNotesPage(
             }
         )
     }
-
 }
 
 @Composable

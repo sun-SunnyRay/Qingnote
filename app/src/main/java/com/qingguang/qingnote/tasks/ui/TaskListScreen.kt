@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -173,6 +174,7 @@ import com.qingguang.qingnote.tasks.toRRule
 import com.qingguang.qingnote.tasks.toTaskMillis
 import com.qingguang.qingnote.utils.SettingsPreferences
 import org.tasks.data.entity.Alarm
+import com.moriafly.salt.ui.SaltTheme
 import org.tasks.data.entity.Task
 import java.text.SimpleDateFormat
 import java.io.File
@@ -1136,15 +1138,16 @@ private fun TaskEditorDialog(
         onDismissRequest = {
             if (settings.backButtonSavesTask) save() else requestCloseEditor()
         },
-        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        Surface(color = MaterialTheme.colorScheme.background) {
+        Surface(color = SaltTheme.colors.background) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
                     .verticalScroll(scrollState)
+                    .imePadding()
             ) {
                 Row(
                     modifier = Modifier
@@ -1156,7 +1159,7 @@ private fun TaskEditorDialog(
                         Icon(
                             imageVector = Icons.Filled.Save,
                             contentDescription = "保存任务",
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = SaltTheme.colors.text,
                         )
                     }
                 }

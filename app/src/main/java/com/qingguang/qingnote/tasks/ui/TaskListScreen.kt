@@ -3449,30 +3449,21 @@ private fun InlineReminderSection(
         }
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .padding(start = 16.dp, end = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.Notifications,
-            contentDescription = null,
-            tint = SaltTheme.colors.subText,
-            modifier = Modifier.size(24.dp),
-        )
-        Spacer(modifier = Modifier.width(32.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            reminders.forEach { r ->
-                ReminderDraftRow(
-                    label  = reminderLabel(r, startDate, dueDate, settings),
-                    onEdit = { edit(r) },
-                    onRemove = {
-                        onRemindersChange(reminders.filterNot { it == r })
-                    },
-                )
-            }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .padding(start = 16.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Notifications,
+                contentDescription = null,
+                tint = SaltTheme.colors.subText,
+                modifier = Modifier.size(24.dp),
+            )
+            Spacer(modifier = Modifier.width(32.dp))
             val showError = isNew && reminders.isEmpty() && (dueDate > 0 || startDate > 0)
             Text(
                 text  = "添加提醒",
@@ -3480,177 +3471,25 @@ private fun InlineReminderSection(
                         else SaltTheme.colors.text.copy(alpha = 0.38f),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
-                    .padding(vertical = 12.dp)
+                    .weight(1f)
                     .clickable { showAddPicker = true },
             )
         }
-    }
-    HorizontalDivider(
-        modifier = Modifier.padding(start = 76.dp),
-        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
-    )
-
-    if (showAddPicker) {
-        AddReminderPickerDialog(
-            reminders  = reminders,
-            startDate  = startDate,
-            dueDate    = dueDate,
-            onDismiss  = { showAddPicker = false },
-            onAdd      = { onRemindersChange((reminders + it).dedupeReminders()); showAddPicker = false },
-            onCustom   = {
-                editingReminder = null
-                customDialog = TaskReminderDraft(
-                    time = -TEN_MINUTES_MILLIS,
-                    type = if (dueDate > 0 || startDate <= 0) Alarm.TYPE_REL_END else Alarm.TYPE_REL_START,
-                )
-                showAddPicker = false
-            },
-            onRandom   = {
-                editingReminder = null
-                randomDialog = TaskReminderDraft(time = ONE_DAY_MILLIS, type = Alarm.TYPE_RANDOM)
-                showAddPicker = false
-            },
-            onAbsolute = {
-                editingReminder = null
-                absoluteDialog = TaskReminderDraft(time = 0L, type = Alarm.TYPE_DATE_TIME)
-                showAddPicker = false
-            },
-        )
-    }
-    customDialog?.let { r ->
-        CustomRelativeReminderDialog(
-            reminder  = r,
-            onDismiss = { customDialog = null; editingReminder = null },
-            onConfirm = { upsert(it); customDialog = null },
-        )
-    }
-    randomDialog?.let { r ->
-        RandomReminderDialog(
-            reminder  = r,
-            onDismiss = { randomDialog = null; editingReminder = null },
-            onConfirm = { upsert(it); randomDialog = null },
-        )
-    }
-    absoluteDialog?.let { r ->
-        AbsoluteReminderDialog(
-            reminder  = r,
-            settings  = settings,
-            onDismiss = { absoluteDialog = null; editingReminder = null },
-            onConfirm = { upsert(it); absoluteDialog = null },
-        )
-    }
-}
-
-@Composable
-private fun AddReminderPickerDialog(
-    reminders : List<TaskReminderDraft>,
-    startDate : Long,
-    dueDate   : Long,
-    onDismiss : () -> Unit,
-    onAdd     : (TaskReminderDraft) -> Unit,
-    onCustom  : () -> Unit,
-    onRandom  : () -> Unit,
-    onAbsolute: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("添加提醒") },
-        text = {
-            Column {
-                if (startDate > 0 && reminders.none { it.type == Alarm.TYPE_REL_START && it.time == 0L }) {
-                    DialogChoice("开始时") { onAdd(TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START)) }
-                }
-                if (dueDate > 0 && reminders.none { it.type == Alarm.TYPE_REL_END && it.time == 0L }) {
-                    DialogChoice("到期时") { onAdd(TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END)) }
-                }
-                if (dueDate > 0 && reminders.none { it.type == Alarm.TYPE_REL_END && it.time == ONE_DAY_MILLIS }) {
-                    DialogChoice("逾期后每天提醒") {
-                        onAdd(TaskReminderDraft(time = ONE_DAY_MILLIS, type = Alarm.TYPE_REL_END, repeat = 6, interval = ONE_DAY_MILLIS))
-                    }
-                }
-                DialogChoice("随机提醒")    { onRandom()   }
-                DialogChoice("选择具体时间") { onAbsolute() }
-                DialogChoice("自定义提醒")  { onCustom()   }
-            }
-        },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
-    )
-}
-
-@Composable
-private fun InlineSubtasksSection(
-    subtasks: List<TaskSubtaskDraft>,
-    onSubtasksChange: (List<TaskSubtaskDraft>) -> Unit,
-) {
-    var focusIndex by remember { mutableIntStateOf(-1) }
-
-    fun addSubtask() {
-        val next = subtasks + TaskSubtaskDraft(title = "")
-        focusIndex = next.lastIndex
-        onSubtasksChange(next)
-    }
-
-    fun updateSubtask(index: Int, draft: TaskSubtaskDraft) {
-        if (index !in subtasks.indices) return
-        onSubtasksChange(
-            subtasks.toMutableList().also {
-                it[index] = draft
-            }
-        )
-    }
-
-    fun removeSubtask(index: Int) {
-        if (index !in subtasks.indices) return
-        val next = subtasks.toMutableList().also { it.removeAt(index) }
-        focusIndex = focusIndex.coerceAtMost(next.lastIndex)
-        onSubtasksChange(next)
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .padding(start = 16.dp, end = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.SubdirectoryArrowRight,
-            contentDescription = null,
-            tint = SaltTheme.colors.subText,
-            modifier = Modifier.size(24.dp),
-        )
-        Spacer(modifier = Modifier.width(32.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            subtasks.forEachIndexed { index, draft ->
-                InlineSubtaskDraftRow(
-                    draft = draft,
-                    requestFocus = focusIndex == index,
-                    onTitleChange = { updateSubtask(index, draft.copy(title = it)) },
-                    onToggle = { updateSubtask(index, draft.copy(completed = !draft.completed)) },
-                    onDelete = { removeSubtask(index) },
-                    onDone = {
-                        if (draft.title.isNotBlank()) {
-                            addSubtask()
-                        }
+        Column(modifier = Modifier.padding(start = 76.dp, end = 4.dp)) {
+            reminders.forEach { r ->
+                ReminderDraftRow(
+                    label  = reminderLabel(r, startDate, dueDate, settings),
+                    onEdit = { edit(r) },
+                    onRemove = {
+                        onRemindersChange(reminders.filterNot { it == r })
                     },
-                )
-            }
-            Text(
-                text = "添加子任务",
-                color = SaltTheme.colors.text.copy(alpha = 0.38f),
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { addSubtask() }
-                    .padding(top = 12.dp, bottom = 12.dp),
             )
         }
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 76.dp),
+            color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
+        )
     }
-    HorizontalDivider(
-        modifier = Modifier.padding(start = 76.dp),
-        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
-    )
 }
 
 @Composable

@@ -2429,12 +2429,12 @@ private fun RepeatEditorDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Surface(color = MaterialTheme.colorScheme.background) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
             Scaffold(
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.background,
+                            containerColor = MaterialTheme.colorScheme.surface,
                             titleContentColor = MaterialTheme.colorScheme.onSurface,
                             navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                             actionIconContentColor = MaterialTheme.colorScheme.primary,
@@ -2651,9 +2651,9 @@ private fun RepeatEditorDialog(
 private fun RepeatSectionHeader(text: String) {
     Text(
         text = text,
+        style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurface,
-        fontSize = 15.sp,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+        modifier = Modifier.padding(horizontal = 16.dp),
     )
 }
 

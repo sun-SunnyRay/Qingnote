@@ -193,16 +193,10 @@ fun AllNotesPage(
         floatingActionButton = {
             if (!showInputDialog) {
                 if (isTasksMode) {
-                    FloatingActionButton(
-                        onClick = { taskListViewModel.showCreateDialog() },
-                        modifier = Modifier.padding(end = 16.dp, bottom = 32.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        containerColor = SaltTheme.colors.highlight.copy(alpha = 0.18f),
-                    ) {
+                    FloatingActionButton(onClick = { taskListViewModel.showCreateDialog() },
+                        modifier = Modifier.padding(end = 16.dp, bottom = 32.dp)) {
                         Icon(
-                            imageVector = Icons.Rounded.Edit,
-                            contentDescription = stringResource(R.string.edit),
-                            tint = SaltTheme.colors.highlight,
+                            Icons.Rounded.Edit, stringResource(R.string.edit)
                         )
                     }
                 } else {

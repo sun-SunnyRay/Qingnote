@@ -1173,32 +1173,26 @@ private fun TaskEditorDialog(
                     onDone = { save() },
                 )
                 TaskEditorRow(
+                    icon = Icons.Outlined.EventAvailable,
+                    primary = if (startDate > 0) formatEditorTimestamp(startDate, settings) else "无开始日期",
+                    secondary = "开始日期",
+                    onClick = { picker = EditorPicker.START },
+                )
+                TaskEditorRow(
                     icon = Icons.Outlined.AccessTime,
                     primary = if (dueDate > 0) formatEditorTimestamp(dueDate, settings) else "无截止日期",
                     secondary = "截止日期",
                     onClick = { picker = EditorPicker.DUE },
                 )
                 TaskEditorRow(
-                    icon = Icons.AutoMirrored.Outlined.Notes,
-                    primary = "描述",
-                    secondary = notes.ifBlank { "无描述" },
-                    onClick = { editorSheet = EditorSheetTarget.NOTES },
-                )
-                TaskEditorRow(
-                    icon = Icons.Outlined.CalendarMonth,
-                    primary = if (addToCalendar) "添加到日历" else "不添加到日历",
-                    secondary = "日历",
-                    onClick = { editorSheet = EditorSheetTarget.CALENDAR },
+                    icon = Icons.Outlined.Repeat,
+                    primary = recurrenceLabel(recurrence),
+                    secondary = "重复",
+                    onClick = { editorSheet = EditorSheetTarget.REPEAT },
                 )
                 PriorityRow(
                     priority = priority,
                     onPriorityChange = { priority = it },
-                )
-                TaskEditorRow(
-                    icon = Icons.Outlined.EventAvailable,
-                    primary = if (startDate > 0) formatEditorTimestamp(startDate, settings) else "无开始日期",
-                    secondary = "开始日期",
-                    onClick = { picker = EditorPicker.START },
                 )
                 InlineSubtasksSection(
                     subtasks = subtasks,
@@ -1223,16 +1217,22 @@ private fun TaskEditorDialog(
                     },
                 )
                 TaskEditorRow(
+                    icon = Icons.AutoMirrored.Outlined.Notes,
+                    primary = "描述",
+                    secondary = notes.ifBlank { "无描述" },
+                    onClick = { editorSheet = EditorSheetTarget.NOTES },
+                )
+                TaskEditorRow(
                     icon = Icons.Outlined.AttachFile,
                     primary = attachmentSummary(attachments),
                     secondary = "附件",
                     onClick = { editorSheet = EditorSheetTarget.ATTACHMENT },
                 )
                 TaskEditorRow(
-                    icon = Icons.Outlined.Repeat,
-                    primary = recurrenceLabel(recurrence),
-                    secondary = "重复",
-                    onClick = { editorSheet = EditorSheetTarget.REPEAT },
+                    icon = Icons.Outlined.CalendarMonth,
+                    primary = if (addToCalendar) "添加到日历" else "不添加到日历",
+                    secondary = "日历",
+                    onClick = { editorSheet = EditorSheetTarget.CALENDAR },
                 )
                 TaskInfoRow(task = task, settings = settings)
             }
@@ -1820,7 +1820,7 @@ private fun TaskInfoRow(task: Task?, settings: TaskSettings) {
         Icon(
             imageVector = Icons.Outlined.Info,
             contentDescription = null,
-            tint = Color(0xFF8E8E8E),
+            tint = SaltTheme.colors.subText,
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
@@ -1858,7 +1858,7 @@ private fun TaskTitleRow(
         Icon(
             imageVector = if (completed) Icons.Outlined.CheckCircle else Icons.Outlined.CheckBoxOutlineBlank,
             contentDescription = null,
-            tint = Color(0xFF8E8E8E),
+            tint = SaltTheme.colors.subText,
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
@@ -1917,7 +1917,7 @@ private fun TaskEditorRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color(0xFF8E8E8E),
+            tint = SaltTheme.colors.subText,
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
@@ -1962,7 +1962,7 @@ private fun PriorityRow(
         Icon(
             imageVector = Icons.Outlined.Flag,
             contentDescription = null,
-            tint = Color(0xFF8E8E8E),
+            tint = SaltTheme.colors.subText,
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
@@ -1972,7 +1972,7 @@ private fun PriorityRow(
             fontSize = 16.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
-        Row {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             for (i in Task.Priority.NONE downTo Task.Priority.HIGH) {
                 PriorityButton(
                     priority = i,
@@ -3458,7 +3458,7 @@ private fun InlineReminderSection(
         Icon(
             imageVector = Icons.Outlined.Notifications,
             contentDescription = null,
-            tint = Color(0xFF8E8E8E),
+            tint = SaltTheme.colors.subText,
             modifier = Modifier.size(24.dp).padding(top = 12.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
@@ -3615,7 +3615,7 @@ private fun InlineSubtasksSection(
         Icon(
             imageVector = Icons.Outlined.SubdirectoryArrowRight,
             contentDescription = null,
-            tint = Color(0xFF8E8E8E),
+            tint = SaltTheme.colors.subText,
             modifier = Modifier
                 .size(24.dp)
                 .padding(top = 12.dp),

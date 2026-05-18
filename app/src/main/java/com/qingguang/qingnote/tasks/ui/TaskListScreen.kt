@@ -507,7 +507,7 @@ private fun TaskErrorView(
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = SaltTheme.colors.subText,
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(onClick = onRetry) {
@@ -543,7 +543,7 @@ private fun EmptyTasksView(
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = SaltTheme.colors.subText,
         )
     }
 }
@@ -567,7 +567,7 @@ private fun TaskSelectionToolbar(
             .statusBarsPadding(),
         tonalElevation = 6.dp,
         shadowElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surface,
+        color = SaltTheme.colors.background,
     ) {
         Row(
             modifier = Modifier
@@ -654,7 +654,7 @@ private fun TaskBatchMoveDialog(
                 item {
                     Text(
                         text = "已选择 $selectedCount 个任务",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = SaltTheme.colors.subText,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
@@ -715,7 +715,7 @@ private fun BatchDateActionDialog(
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = "已选择 $selectedCount 个任务",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = SaltTheme.colors.subText,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -746,7 +746,7 @@ private fun BatchPriorityDialog(
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = "已选择 $selectedCount 个任务",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = SaltTheme.colors.subText,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -781,7 +781,7 @@ private fun BatchTagsDialog(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "已选择 $selectedCount 个任务",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = SaltTheme.colors.subText,
                     fontSize = 13.sp,
                 )
                 OutlinedTextField(
@@ -830,12 +830,12 @@ private fun BatchMoveListRow(
     iconLabel: String? = null,
     onClick: () -> Unit,
 ) {
-    val contentColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    val contentColor = if (selected) SaltTheme.colors.highlight else SaltTheme.colors.text
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
+            .background(if (selected) SaltTheme.colors.highlight.copy(alpha = 0.1f) else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -843,7 +843,7 @@ private fun BatchMoveListRow(
         TaskListAppearanceMark(
             color = accentColor,
             iconLabel = iconLabel,
-            fallbackColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            fallbackColor = SaltTheme.colors.subText,
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
@@ -856,7 +856,7 @@ private fun BatchMoveListRow(
         if (count != null) {
             Text(
                 text = count.toString(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = SaltTheme.colors.subText,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(horizontal = 8.dp),
             )
@@ -865,7 +865,7 @@ private fun BatchMoveListRow(
             Icon(
                 imageVector = Icons.Outlined.CheckCircle,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = SaltTheme.colors.highlight,
                 modifier = Modifier.size(18.dp),
             )
         }
@@ -1720,13 +1720,13 @@ private fun TaskEditorSheetHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = SaltTheme.colors.text,
         )
         if (subtitle != null) {
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = SaltTheme.colors.subText,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -1740,7 +1740,7 @@ private fun TaskEditorSheetRow(
     title: String,
     subtitle: String? = null,
     selected: Boolean = false,
-    accent: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    accent: Color = SaltTheme.colors.subText,
     onClick: () -> Unit,
 ) {
     Row(
@@ -1754,14 +1754,14 @@ private fun TaskEditorSheetRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (selected) MaterialTheme.colorScheme.primary else accent,
+            tint = if (selected) SaltTheme.colors.highlight else accent,
             modifier = Modifier.size(26.dp),
         )
         Spacer(modifier = Modifier.width(22.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                color = if (selected) SaltTheme.colors.highlight else SaltTheme.colors.text,
                 fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1769,7 +1769,7 @@ private fun TaskEditorSheetRow(
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = SaltTheme.colors.subText,
                     fontSize = 15.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1780,7 +1780,7 @@ private fun TaskEditorSheetRow(
             Icon(
                 imageVector = Icons.Outlined.CheckCircle,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = SaltTheme.colors.highlight,
                 modifier = Modifier.size(24.dp),
             )
         }
@@ -1827,12 +1827,12 @@ private fun TaskInfoRow(task: Task?, settings: TaskSettings) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = "已创建的 ${formatInfoTimestamp(created, settings)}",
-                color = MaterialTheme.colorScheme.onSurface,
+                color = SaltTheme.colors.text,
                 fontSize = 14.sp,
             )
             Text(
                 text = "已修改的 ${formatInfoTimestamp(modified, settings)}",
-                color = MaterialTheme.colorScheme.onSurface,
+                color = SaltTheme.colors.text,
                 fontSize = 14.sp,
             )
         }
@@ -1879,7 +1879,7 @@ private fun TaskTitleRow(
                         Text(
                             text = "任务名称",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                            color = SaltTheme.colors.text.copy(alpha = 0.38f),
                         )
                     }
                     innerTextField()
@@ -1893,7 +1893,7 @@ private fun TaskTitleRow(
     }
     HorizontalDivider(
         modifier = Modifier.padding(start = 76.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
     )
 }
 
@@ -1924,7 +1924,7 @@ private fun TaskEditorRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = primary,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (primary.startsWith("添加") || primary.startsWith("无") || primary == "描述") 0.48f else 1f),
+                color = SaltTheme.colors.text.copy(alpha = if (primary.startsWith("添加") || primary.startsWith("无") || primary == "描述") 0.48f else 1f),
                 fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -1932,7 +1932,7 @@ private fun TaskEditorRow(
             if (secondary != null) {
                 Text(
                     text = secondary,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                    color = SaltTheme.colors.text.copy(alpha = 0.45f),
                     fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1943,7 +1943,7 @@ private fun TaskEditorRow(
     }
     HorizontalDivider(
         modifier = Modifier.padding(start = 76.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
     )
 }
 
@@ -1968,7 +1968,7 @@ private fun PriorityRow(
         Spacer(modifier = Modifier.width(32.dp))
         Text(
             text = "优先级",
-            color = MaterialTheme.colorScheme.onSurface,
+            color = SaltTheme.colors.text,
             fontSize = 16.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -1984,7 +1984,7 @@ private fun PriorityRow(
     }
     HorizontalDivider(
         modifier = Modifier.padding(start = 76.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
     )
 }
 
@@ -2228,7 +2228,7 @@ private fun DateTimeEditorDialog(
                     }
                 },
             )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+            HorizontalDivider(color = SaltTheme.colors.stroke.copy(alpha = 0.25f))
             Column(
                 modifier = Modifier
                     .heightIn(max = 470.dp)
@@ -2239,7 +2239,7 @@ private fun DateTimeEditorDialog(
                     title = {},
                     showModeToggle = false,
                     colors = DatePickerDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = SaltTheme.colors.background,
                     ),
                 )
             }
@@ -2253,7 +2253,7 @@ private fun DateTimeEditorDialog(
                 Icon(
                     imageVector = Icons.Outlined.CalendarToday,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = SaltTheme.colors.highlight,
                     modifier = Modifier.size(26.dp),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -2312,7 +2312,7 @@ private fun DateTimeShortcutButton(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+    val color = if (selected) SaltTheme.colors.highlight else SaltTheme.colors.text
     TextButton(
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(contentColor = color),
@@ -2429,15 +2429,15 @@ private fun RepeatEditorDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Surface(color = MaterialTheme.colorScheme.surface) {
+        Surface(color = SaltTheme.colors.background) {
             Scaffold(
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface,
-                            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-                            actionIconContentColor = MaterialTheme.colorScheme.primary,
+                            containerColor = SaltTheme.colors.background,
+                            titleContentColor = SaltTheme.colors.text,
+                            navigationIconContentColor = SaltTheme.colors.text,
+                            actionIconContentColor = SaltTheme.colors.highlight,
                         ),
                         title = {
                             Text(text = "自定义重复周期")
@@ -2597,7 +2597,7 @@ private fun RepeatEditorDialog(
                         Box(
                             modifier = Modifier
                                 .height(45.dp)
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                                .border(1.dp, SaltTheme.colors.text.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                                 .padding(horizontal = 12.dp)
                                 .clickable {
                                     endMode = RepeatEndMode.UNTIL
@@ -2607,8 +2607,8 @@ private fun RepeatEditorDialog(
                         ) {
                             Text(
                                 text = untilText.ifEmpty { "选择日期" },
-                                color = if (untilText.isEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                                        else MaterialTheme.colorScheme.onSurface,
+                                color = if (untilText.isEmpty()) SaltTheme.colors.text.copy(alpha = 0.4f)
+                                        else SaltTheme.colors.text,
                             )
                         }
                     }
@@ -2652,7 +2652,7 @@ private fun RepeatSectionHeader(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = SaltTheme.colors.text,
         modifier = Modifier.padding(horizontal = 16.dp),
     )
 }
@@ -2690,7 +2690,7 @@ private fun RepeatOptionRow(text: String, selected: Boolean, onClick: () -> Unit
             Icon(
                 imageVector = Icons.Outlined.CheckCircle,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = SaltTheme.colors.highlight,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -2714,17 +2714,17 @@ private fun RepeatFrequencySpinner(
     Box(
         modifier = Modifier
             .height(45.dp)
-            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+            .border(1.dp, SaltTheme.colors.text.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
             .padding(horizontal = 8.dp)
             .clickable { expanded = true },
         contentAlignment = Alignment.Center,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = currentLabel, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = currentLabel, color = SaltTheme.colors.text)
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowDown,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = SaltTheme.colors.text,
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
@@ -2735,7 +2735,7 @@ private fun RepeatFrequencySpinner(
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = SaltTheme.colors.text,
                         )
                     },
                 )
@@ -2770,8 +2770,8 @@ private fun WeekdaySelector(
                     .padding(bottom = 5.dp)
                     .size(36.dp)
                     .then(
-                        if (checked) Modifier.background(MaterialTheme.colorScheme.secondary, CircleShape)
-                        else Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), CircleShape)
+                        if (checked) Modifier.background(SaltTheme.colors.highlight, CircleShape)
+                        else Modifier.border(1.dp, SaltTheme.colors.text.copy(alpha = 0.5f), CircleShape)
                     )
                     .clickable { onChange(if (checked) selected - day else selected + day) },
                 contentAlignment = Alignment.Center,
@@ -2779,7 +2779,7 @@ private fun WeekdaySelector(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (checked) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface,
+                    color = if (checked) SaltTheme.colors.background else SaltTheme.colors.text,
                 )
             }
         }
@@ -2806,15 +2806,15 @@ private fun DateTimeChip(
 ) {
     Text(
         text = text,
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        color = if (selected) SaltTheme.colors.highlight else SaltTheme.colors.text,
         fontSize = 14.sp,
         modifier = Modifier
             .clip(RoundedCornerShape(999.dp))
             .background(
                 if (selected) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                    SaltTheme.colors.highlight.copy(alpha = 0.14f)
                 } else {
-                    MaterialTheme.colorScheme.surfaceVariant
+                    SaltTheme.colors.subBackground
                 }
             )
             .clickable(onClick = onClick)
@@ -2885,7 +2885,7 @@ private fun RemindersDialog(
                 if (drafts.isEmpty()) {
                     Text(
                         text = "没有提醒",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = SaltTheme.colors.subText,
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                 } else {
@@ -3476,7 +3476,7 @@ private fun InlineReminderSection(
             Text(
                 text  = "添加提醒",
                 color = if (showError) MaterialTheme.colorScheme.error
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        else SaltTheme.colors.text.copy(alpha = 0.38f),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier
                     .padding(vertical = 12.dp)
@@ -3486,7 +3486,7 @@ private fun InlineReminderSection(
     }
     HorizontalDivider(
         modifier = Modifier.padding(start = 76.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
     )
 
     if (showAddPicker) {
@@ -3638,7 +3638,7 @@ private fun InlineSubtasksSection(
             }
             Text(
                 text = "添加子任务",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                color = SaltTheme.colors.text.copy(alpha = 0.38f),
                 fontSize = 16.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -3649,7 +3649,7 @@ private fun InlineSubtasksSection(
     }
     HorizontalDivider(
         modifier = Modifier.padding(start = 76.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.16f),
+        color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
     )
 }
 
@@ -3687,10 +3687,10 @@ private fun InlineSubtaskDraftRow(
         BasicTextField(
             value = draft.title,
             onValueChange = onTitleChange,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+            cursorBrush = SolidColor(SaltTheme.colors.text),
             singleLine = false,
             textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (draft.completed) 0.45f else 1f),
+                color = SaltTheme.colors.text.copy(alpha = if (draft.completed) 0.45f else 1f),
                 textDecoration = if (draft.completed) TextDecoration.LineThrough else TextDecoration.None,
                 textDirection = TextDirection.Content,
                 fontSize = 16.sp,
@@ -3744,7 +3744,7 @@ private fun AttachmentsDialog(
                 if (attachments.isEmpty()) {
                     Text(
                         text = "还没有附件",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = SaltTheme.colors.subText,
                     )
                 } else {
                     attachments.forEach { attachment ->
@@ -3817,7 +3817,7 @@ private fun AttachmentItemRow(
             Text(
                 text = if (permissionValid) "点击打开" else "权限可能已失效",
                 color = if (permissionValid) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    SaltTheme.colors.subText
                 } else {
                     MaterialTheme.colorScheme.error
                 },
@@ -4030,7 +4030,7 @@ private fun TaskList(
 private fun TaskGroupHeader(title: String) {
     Text(
         text = title,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = SaltTheme.colors.subText,
         fontSize = 13.sp,
         fontWeight = FontWeight.Medium,
         modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp),
@@ -4147,7 +4147,7 @@ private fun TaskItem(
         Task.Priority.HIGH -> Color(0xFFE53935)
         Task.Priority.MEDIUM -> Color(0xFFFB8C00)
         Task.Priority.LOW -> Color(0xFF43A047)
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> SaltTheme.colors.subText
     }
 
     Surface(
@@ -4161,9 +4161,9 @@ private fun TaskItem(
                 onLongClick = onEnterSelection,
             ),
         color = if (selected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)
+            SaltTheme.colors.highlight.copy(alpha = 0.13f)
         } else {
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            SaltTheme.colors.subBackground.copy(alpha = 0.5f)
         },
     ) {
         Row(
@@ -4180,7 +4180,7 @@ private fun TaskItem(
                     imageVector = if (selected || task.isCompleted) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
                     contentDescription = if (selectionMode) "Select task" else if (task.isCompleted) "Mark incomplete" else "Mark complete",
                     tint = when {
-                        selected -> MaterialTheme.colorScheme.primary
+                        selected -> SaltTheme.colors.highlight
                         task.isCompleted -> Color(0xFF43A047)
                         else -> priorityColor
                     },
@@ -4198,9 +4198,9 @@ private fun TaskItem(
                         fontWeight = FontWeight.Medium,
                     ),
                     color = if (task.isCompleted)
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        SaltTheme.colors.text.copy(alpha = 0.5f)
                     else
-                        MaterialTheme.colorScheme.onSurface,
+                        SaltTheme.colors.text,
                     maxLines = if (settings.showFullTaskTitle) Int.MAX_VALUE else 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -4209,7 +4209,7 @@ private fun TaskItem(
                     Text(
                         text = task.notes.orEmpty(),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = SaltTheme.colors.subText,
                         maxLines = if (settings.showFullDescription) Int.MAX_VALUE else 2,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -4219,7 +4219,7 @@ private fun TaskItem(
                     Text(
                         text = "开始 ${formatShortDate(task.hideUntil, settings)}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = SaltTheme.colors.subText,
                     )
                 }
                 if (settings.showDueDate && task.hasDueDate()) {
@@ -4228,7 +4228,7 @@ private fun TaskItem(
                     Text(
                         text = "截止 ${formatShortDate(task.dueDate, settings)}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isOverdue) Color(0xFFE53935) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isOverdue) Color(0xFFE53935) else SaltTheme.colors.subText,
                     )
                 }
                 TaskInlineSubtasks(
@@ -4258,7 +4258,7 @@ private fun TaskItem(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        tint = SaltTheme.colors.subText.copy(alpha = 0.6f),
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -4293,15 +4293,15 @@ private fun TaskInlineSubtasks(
                 Icon(
                     imageVector = if (completed) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
                     contentDescription = null,
-                    tint = if (completed) Color(0xFF43A047) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (completed) Color(0xFF43A047) else SaltTheme.colors.subText,
                     modifier = Modifier.size(14.dp),
                 )
                 Text(
                     text = subtask.title,
                     color = if (completed) {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        SaltTheme.colors.subText.copy(alpha = 0.7f)
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        SaltTheme.colors.subText
                     },
                     fontSize = 12.sp,
                     maxLines = 1,
@@ -4314,7 +4314,7 @@ private fun TaskInlineSubtasks(
         if (remaining > 0) {
             Text(
                 text = "还有 $remaining 个子任务",
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
+                color = SaltTheme.colors.subText.copy(alpha = 0.72f),
                 fontSize = 12.sp,
             )
         }
@@ -4346,11 +4346,11 @@ private fun TaskExtrasChips(extras: TaskListExtras) {
         chips.forEach { chip ->
             Text(
                 text = chip,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = SaltTheme.colors.subText,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .clip(RoundedCornerShape(999.dp))
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                    .background(SaltTheme.colors.background.copy(alpha = 0.9f))
                     .padding(horizontal = 8.dp, vertical = 4.dp),
             )
         }

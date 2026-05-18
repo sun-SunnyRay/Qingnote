@@ -1504,7 +1504,7 @@ private fun TaskEditorActionSheet(
     onAddAttachment: () -> Unit,
     onClearAttachments: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val today = remember { LocalDate.now() }
     val dueDateTime = remember(dueDate) {
         dueDate.takeIf { it > 0 }
@@ -3452,14 +3452,15 @@ private fun InlineReminderSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, top = 8.dp, bottom = 4.dp, end = 4.dp),
-        verticalAlignment = Alignment.Top,
+            .height(64.dp)
+            .padding(start = 16.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Outlined.Notifications,
             contentDescription = null,
             tint = SaltTheme.colors.subText,
-            modifier = Modifier.size(24.dp).padding(top = 12.dp),
+            modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -3609,16 +3610,15 @@ private fun InlineSubtasksSection(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.Top,
+            .height(64.dp)
+            .padding(start = 16.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = Icons.Outlined.SubdirectoryArrowRight,
             contentDescription = null,
             tint = SaltTheme.colors.subText,
-            modifier = Modifier
-                .size(24.dp)
-                .padding(top = 12.dp),
+            modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(32.dp))
         Column(modifier = Modifier.weight(1f)) {

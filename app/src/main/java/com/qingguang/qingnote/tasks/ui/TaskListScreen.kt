@@ -3483,7 +3483,84 @@ private fun InlineReminderSection(
                     onRemove = {
                         onRemindersChange(reminders.filterNot { it == r })
                     },
+                )
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 76.dp),
+            color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
+        )
+    }
+}
+
+@Composable
+private fun InlineSubtasksSection(
+    subtasks: List<TaskSubtaskDraft>,
+    onSubtasksChange: (List<TaskSubtaskDraft>) -> Unit,
+) {
+    var focusIndex by remember { mutableIntStateOf(-1) }
+
+    fun addSubtask() {
+        val next = subtasks + TaskSubtaskDraft(title = "")
+        focusIndex = next.lastIndex
+        onSubtasksChange(next)
+    }
+
+    fun updateSubtask(index: Int, draft: TaskSubtaskDraft) {
+        if (index !in subtasks.indices) return
+        onSubtasksChange(
+            subtasks.toMutableList().also {
+                it[index] = draft
+            }
+        )
+    }
+
+    fun removeSubtask(index: Int) {
+        if (index !in subtasks.indices) return
+        val next = subtasks.toMutableList().also { it.removeAt(index) }
+        focusIndex = focusIndex.coerceAtMost(next.lastIndex)
+        onSubtasksChange(next)
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .padding(start = 16.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.SubdirectoryArrowRight,
+                contentDescription = null,
+                tint = SaltTheme.colors.subText,
+                modifier = Modifier.size(24.dp),
             )
+            Spacer(modifier = Modifier.width(32.dp))
+            Text(
+                text = "添加子任务",
+                color = SaltTheme.colors.text.copy(alpha = 0.38f),
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { addSubtask() },
+            )
+        }
+        Column(modifier = Modifier.padding(start = 76.dp, end = 4.dp)) {
+            subtasks.forEachIndexed { index, draft ->
+                InlineSubtaskDraftRow(
+                    draft = draft,
+                    requestFocus = focusIndex == index,
+                    onTitleChange = { updateSubtask(index, draft.copy(title = it)) },
+                    onToggle = { updateSubtask(index, draft.copy(completed = !draft.completed)) },
+                    onDelete = { removeSubtask(index) },
+                    onDone = {
+                        if (draft.title.isNotBlank()) {
+                            addSubtask()
+                        }
+                    },
+                )
+            }
         }
         HorizontalDivider(
             modifier = Modifier.padding(start = 76.dp),

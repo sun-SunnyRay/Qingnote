@@ -1146,8 +1146,8 @@ private fun TaskEditorDialog(
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
-                    .verticalScroll(scrollState)
                     .imePadding()
+                    .verticalScroll(scrollState)
             ) {
                 Row(
                     modifier = Modifier
@@ -1972,7 +1972,7 @@ private fun PriorityRow(
             fontSize = 16.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             for (i in Task.Priority.NONE downTo Task.Priority.HIGH) {
                 PriorityButton(
                     priority = i,
@@ -2060,7 +2060,7 @@ private fun DateTimeEditorDialog(
     }
     val today = LocalDate.now()
     var showTimePicker by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val title = when (picker) {
         EditorPicker.START -> "开始日期"
         EditorPicker.DUE -> "截止日期"
@@ -3449,12 +3449,93 @@ private fun InlineReminderSection(
         }
     }
 
+    if (showAddPicker) {
+        AlertDialog(
+            onDismissRequest = { showAddPicker = false },
+            title = { Text("添加提醒") },
+            text = {
+                Column {
+                    // 开始时提醒
+                    TextButton(
+                        onClick = {
+                            onRemindersChange(
+                                (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START))
+                                    .dedupeReminders()
+                            )
+                            showAddPicker = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("开始时提醒", modifier = Modifier.fillMaxWidth())
+                    }
+                    // 到期时提醒
+                    TextButton(
+                        onClick = {
+                            onRemindersChange(
+                                (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END))
+                                    .dedupeReminders()
+                            )
+                            showAddPicker = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("到期时提醒", modifier = Modifier.fillMaxWidth())
+                    }
+                    // 逾期后每天提醒
+                    TextButton(
+                        onClick = {
+                            onRemindersChange(
+                                (reminders + TaskReminderDraft(
+                                    time = ONE_DAY_MILLIS,
+                                    type = Alarm.TYPE_REL_END,
+                                    repeat = 6,
+                                    interval = ONE_DAY_MILLIS
+                                )).dedupeReminders()
+                            )
+                            showAddPicker = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("逾期后每天提醒", modifier = Modifier.fillMaxWidth())
+                    }
+                    // 选择日期和时间
+                    TextButton(
+                        onClick = {
+                            // 这里应该打开日期时间选择器
+                            showAddPicker = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("选择日期和时间", modifier = Modifier.fillMaxWidth())
+                    }
+                    // 自定义
+                    TextButton(
+                        onClick = {
+                            customDialog = TaskReminderDraft(time = -15 * ONE_MINUTE_MILLIS, type = Alarm.TYPE_REL_END)
+                            showAddPicker = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("自定义", modifier = Modifier.fillMaxWidth())
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showAddPicker = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp)
-                .padding(start = 16.dp, end = 16.dp),
+                .padding(start = 16.dp, end = 16.dp)
+                .clickable { showAddPicker = true },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -3470,9 +3551,7 @@ private fun InlineReminderSection(
                 color = if (showError) MaterialTheme.colorScheme.error
                         else SaltTheme.colors.text.copy(alpha = 0.38f),
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { showAddPicker = true },
+                modifier = Modifier.weight(1f),
             )
         }
         Column(modifier = Modifier.padding(start = 76.dp, end = 4.dp)) {

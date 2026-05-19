@@ -2468,10 +2468,11 @@ private fun RepeatEditorDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 28.dp)
             ) {
-                Spacer(modifier = Modifier.height(22.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 RepeatSectionHeader("重复频率")
+                Spacer(modifier = Modifier.height(16.dp))
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -2493,6 +2494,7 @@ private fun RepeatEditorDialog(
                     if (frequency == RepeatFrequency.WEEKLY) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                         RepeatSectionHeader("重复于")
+                        Spacer(modifier = Modifier.height(16.dp))
                         WeekdaySelector(
                             selected = weekDays,
                             onChange = { weekDays = it },
@@ -2501,6 +2503,7 @@ private fun RepeatEditorDialog(
                     if (frequency == RepeatFrequency.MONTHLY) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                         RepeatSectionHeader("重复于")
+                        Spacer(modifier = Modifier.height(16.dp))
                         RepeatOptionRow("按每月日期", monthlyMode == RepeatMonthlyMode.DAY_OF_MONTH) {
                             monthlyMode = RepeatMonthlyMode.DAY_OF_MONTH
                         }
@@ -2541,6 +2544,7 @@ private fun RepeatEditorDialog(
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                     RepeatSectionHeader("重复依据")
+                    Spacer(modifier = Modifier.height(8.dp))
                     RepeatOptionRow(
                         text = "按截止日期重复",
                         selected = selectedRepeatFrom == Task.RepeatFrom.DUE_DATE,
@@ -2555,6 +2559,7 @@ private fun RepeatEditorDialog(
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                     RepeatSectionHeader("结束")
+                    Spacer(modifier = Modifier.height(8.dp))
                     RepeatEndRow(
                         selected = endMode == RepeatEndMode.NEVER,
                         onClick = { endMode = RepeatEndMode.NEVER },

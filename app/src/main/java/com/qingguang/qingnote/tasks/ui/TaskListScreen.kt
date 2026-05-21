@@ -97,6 +97,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -2263,12 +2264,27 @@ private fun DateTimeEditorDialog(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.CalendarToday,
-                    contentDescription = null,
-                    tint = SaltTheme.colors.highlight,
-                    modifier = Modifier.size(26.dp),
-                )
+                val displayMode = datePickerState.displayMode
+                IconButton(
+                    onClick = {
+                        datePickerState.displayMode = if (displayMode == DisplayMode.Input) {
+                            DisplayMode.Picker
+                        } else {
+                            DisplayMode.Input
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = if (displayMode == DisplayMode.Input) {
+                            Icons.Outlined.CalendarToday
+                        } else {
+                            Icons.Rounded.Edit
+                        },
+                        contentDescription = null,
+                        tint = SaltTheme.colors.highlight,
+                        modifier = Modifier.size(26.dp),
+                    )
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                     TextButton(onClick = onDismiss) {
                         Text("取消")

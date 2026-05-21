@@ -2260,7 +2260,8 @@ private fun DateTimeEditorDialog(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+                    .padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
+                    .navigationBarsPadding(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -2577,21 +2578,6 @@ private fun RepeatEditorDialog(
                         }
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-                    RepeatSectionHeader("重复依据")
-                    Spacer(modifier = Modifier.height(12.dp))
-                    RepeatOptionRow(
-                        text = "按截止日期重复",
-                        selected = selectedRepeatFrom == Task.RepeatFrom.DUE_DATE,
-                    ) {
-                        selectedRepeatFrom = Task.RepeatFrom.DUE_DATE
-                    }
-                    RepeatOptionRow(
-                        text = "按完成日期重复",
-                        selected = selectedRepeatFrom == Task.RepeatFrom.COMPLETION_DATE,
-                    ) {
-                        selectedRepeatFrom = Task.RepeatFrom.COMPLETION_DATE
-                    }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
                     RepeatSectionHeader("结束")
                     Spacer(modifier = Modifier.height(12.dp))
                     RepeatEndRow(
@@ -2803,17 +2789,12 @@ private fun WeekdaySelector(
         DayOfWeek.SUNDAY to "日",
     )
     
-    // 计算总宽度和间距，使7个按钮均匀分布
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val horizontalPadding = 32.dp // 16.dp * 2
-    val availableWidth = screenWidth - horizontalPadding
-    val buttonSize = 44.dp
-    val totalButtonWidth = buttonSize * 7
-    val spacing = ((availableWidth - totalButtonWidth) / 6).coerceAtLeast(8.dp)
+    // 使用固定间距，确保7个按钮在一行显示
+    val buttonSize = 40.dp
+    val spacing = 8.dp
     
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(spacing),
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(spacing, Alignment.CenterHorizontally),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
@@ -3294,36 +3275,93 @@ private fun CustomRelativeReminderDialog(
                         .focusRequester(focusRequester),
                     singleLine = true,
                     isError = amount == null || amount < 0,
-                    label = { Text("时间") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Unit selection with inline before/due buttons
                 ReminderUnit.values().forEach { unit ->
-                    RepeatOptionRow(unit.label(amount ?: 0), selectedUnit == unit) {
-                        selectedUnit = unit
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selectedUnit == unit,
+                            onClick = { selectedUnit = unit }
+                        )
+                        Text(
+                            text = unit.label(amount ?: 0),
+                            modifier = Modifier.weight(1f)
+                        )
+                        // Show before/due buttons only for selected unit
+                        if (selectedUnit == unit) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                TextButton(
+                                    onClick = { relation = ReminderRelation.BEFORE },
+                                    modifier = Modifier
+                                        .border(
+                                            1.dp,
+                                            if (relation == ReminderRelation.BEFORE) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                                ) {
+                                    Text("前")
+                                }
+                                TextButton(
+                                    onClick = { relation = ReminderRelation.AFTER },
+                                    modifier = Modifier
+                                        .border(
+                                            1.dp,
+                                            if (relation == ReminderRelation.AFTER) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                                ) {
+                                    Text("到期")
+                                }
+                            }
+                        }
                     }
                 }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                RepeatOptionRow("之前", relation == ReminderRelation.BEFORE) {
-                    relation = ReminderRelation.BEFORE
+                
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                
+                // Anchor selection (start/due date)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = anchor == ReminderAnchor.START,
+                        onClick = { anchor = ReminderAnchor.START }
+                    )
+                    Text("开始日期", modifier = Modifier.weight(1f))
+                    RadioButton(
+                        selected = anchor == ReminderAnchor.DUE,
+                        onClick = { anchor = ReminderAnchor.DUE }
+                    )
+                    Text("截止日期")
                 }
-                RepeatOptionRow("之后", relation == ReminderRelation.AFTER) {
-                    relation = ReminderRelation.AFTER
+                
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                
+                // Repeat option
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = !repeatEnabled,
+                        onClick = { repeatEnabled = false }
+                    )
+                    Text("不重复", modifier = Modifier.weight(1f))
                 }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                RepeatOptionRow("开始日期", anchor == ReminderAnchor.START) {
-                    anchor = ReminderAnchor.START
-                }
-                RepeatOptionRow("截止日期", anchor == ReminderAnchor.DUE) {
-                    anchor = ReminderAnchor.DUE
-                }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                RepeatOptionRow("不重复", !repeatEnabled) {
-                    repeatEnabled = false
-                }
-                RepeatOptionRow("重复提醒", repeatEnabled) {
-                    repeatEnabled = true
-                }
+                
                 if (repeatEnabled) {
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
@@ -3350,6 +3388,7 @@ private fun CustomRelativeReminderDialog(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
                 }
+                
                 if (validationError != null) {
                     Text(
                         text = validationError,

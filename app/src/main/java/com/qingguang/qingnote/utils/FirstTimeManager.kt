@@ -54,7 +54,7 @@ class FirstTimeManager @Inject constructor() {
 
     suspend fun generateIntroduceNoteList() {
         try {
-            if (!SettingsPreferences.firstLaunch.first() || tagNoteRepo.queryAllNoteList().isNotEmpty()) {
+            if (!SettingsPreferences.firstLaunch.first()) {
                 return
             }
             if (App.instance.isSystemLanguageEnglish()) {
@@ -62,6 +62,8 @@ class FirstTimeManager @Inject constructor() {
             } else {
                 generateChineseIntroduceNoteList()
             }
+            // 创建成功后，将 firstLaunch 设置为 false
+            SettingsPreferences.changeFirstLaunch(false)
         } catch (e: Exception) {
             e.printStackTrace()
         }

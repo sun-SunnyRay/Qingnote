@@ -48,9 +48,12 @@ class MainActivity : AppCompatActivity() {
         //https://github.com/android/compose-samples/issues/1256
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, insets -> insets }
 
-        firstTimeManager.generateIntroduceNoteList()
-
         lifecycleScope.launch {
+            try {
+                firstTimeManager.generateIntroduceNoteList()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             handleAuthentication()
         }
     }

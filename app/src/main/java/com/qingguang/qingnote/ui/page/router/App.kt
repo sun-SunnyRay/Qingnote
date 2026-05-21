@@ -71,23 +71,21 @@ fun App() {
     }
 
     val colors = when (themeModeState) {
-        SettingsPreferences.ThemeMode.LIGHT -> if (dynamicColor) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        SettingsPreferences.ThemeMode.LIGHT -> if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             saltColorsByColorScheme(
                 dynamicLightColorScheme(context)
             )
-        } else {
-            TODO("VERSION.SDK_INT < S")
         } else lightSaltColors()
 
-        SettingsPreferences.ThemeMode.DARK -> if (dynamicColor) saltColorsByColorScheme(dynamicDarkColorScheme(context)) else darkSaltColors()
+        SettingsPreferences.ThemeMode.DARK -> if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) saltColorsByColorScheme(dynamicDarkColorScheme(context)) else darkSaltColors()
 
         SettingsPreferences.ThemeMode.SYSTEM -> {
             if (isSystemInDarkTheme())
-                if (dynamicColor) saltColorsByColorScheme(
+                if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) saltColorsByColorScheme(
                     dynamicDarkColorScheme(context)
                 ) else darkSaltColors()
             else
-                if (dynamicColor) saltColorsByColorScheme(
+                if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) saltColorsByColorScheme(
                     dynamicLightColorScheme(context)
                 ) else lightSaltColors()
         }

@@ -52,16 +52,18 @@ class FirstTimeManager @Inject constructor() {
     @Inject
     lateinit var tagNoteRepo: TagNoteRepo
 
-    fun generateIntroduceNoteList() {
-        lunchIo {
+    suspend fun generateIntroduceNoteList() {
+        try {
             if (!SettingsPreferences.firstLaunch.first() || tagNoteRepo.queryAllNoteList().isNotEmpty()) {
-                return@lunchIo
+                return
             }
             if (App.instance.isSystemLanguageEnglish()) {
                 generateEnglishIntroduceNoteList()
             } else {
                 generateChineseIntroduceNoteList()
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

@@ -1,5 +1,14 @@
 package com.qingguang.qingnote.tasks.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ripple
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.text.style.TextAlign
 import android.Manifest
 import android.app.AlarmManager
 import android.content.Context
@@ -1146,8 +1155,8 @@ private fun TaskEditorDialog(
                     .fillMaxSize()
                     .statusBarsPadding()
                     .navigationBarsPadding()
-                    .imePadding()
                     .verticalScroll(scrollState)
+                    .imePadding()
             ) {
                 Row(
                     modifier = Modifier
@@ -1235,6 +1244,7 @@ private fun TaskEditorDialog(
                     onClick = { editorSheet = EditorSheetTarget.CALENDAR },
                 )
                 TaskInfoRow(task = task, settings = settings)
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
@@ -1298,7 +1308,10 @@ private fun TaskEditorDialog(
             },
             onOpenRepeatEditor = {
                 editorSheet = null
-                picker = EditorPicker.REPEAT
+                editorScope.launch {
+                    delay(300)
+                    picker = EditorPicker.REPEAT
+                }
             },
             onAddReminder = {
                 reminders = (reminders + it).dedupeReminders()
@@ -2382,7 +2395,7 @@ private fun RepeatEditorDialog(
     onConfirm: (String?, Int) -> Unit,
 ) {
     val initial = remember(recurrence) { parseRepeatDraft(recurrence) }
-    var frequency by remember(recurrence) { mutableStateOf(initial.frequency) }
+    var frequency by remember(recurrence) { mutableStateOf(if (initial.frequency == RepeatFrequency.NONE) RepeatFrequency.WEEKLY else initial.frequency) }
     var intervalText by remember(recurrence) { mutableStateOf(initial.interval.toString()) }
     var weekDays by remember(recurrence) { mutableStateOf(initial.weekDays) }
     var monthlyMode by remember(recurrence) { mutableStateOf(initial.monthlyMode) }
@@ -2468,19 +2481,24 @@ private fun RepeatEditorDialog(
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 28.dp)
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
                 RepeatSectionHeader("重复频率")
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     OutlinedTextField(
                         value = intervalText,
                         onValueChange = { intervalText = it.filter(Char::isDigit).take(3) },
-                        modifier = Modifier.width(80.dp),
+                        modifier = Modifier.width(72.dp),
                         singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            textAlign = TextAlign.Center
+                        ),
                         isError = validationError != null && intervalText.toIntOrNull() == null,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
@@ -2492,7 +2510,7 @@ private fun RepeatEditorDialog(
 
                 if (frequency != RepeatFrequency.NONE) {
                     if (frequency == RepeatFrequency.WEEKLY) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
                         RepeatSectionHeader("重复于")
                         Spacer(modifier = Modifier.height(16.dp))
                         WeekdaySelector(
@@ -2501,9 +2519,9 @@ private fun RepeatEditorDialog(
                         )
                     }
                     if (frequency == RepeatFrequency.MONTHLY) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
                         RepeatSectionHeader("重复于")
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         RepeatOptionRow("按每月日期", monthlyMode == RepeatMonthlyMode.DAY_OF_MONTH) {
                             monthlyMode = RepeatMonthlyMode.DAY_OF_MONTH
                         }
@@ -2542,9 +2560,9 @@ private fun RepeatEditorDialog(
                             )
                         }
                     }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
                     RepeatSectionHeader("重复依据")
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     RepeatOptionRow(
                         text = "按截止日期重复",
                         selected = selectedRepeatFrom == Task.RepeatFrom.DUE_DATE,
@@ -2557,14 +2575,14 @@ private fun RepeatEditorDialog(
                     ) {
                         selectedRepeatFrom = Task.RepeatFrom.COMPLETION_DATE
                     }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
                     RepeatSectionHeader("结束")
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     RepeatEndRow(
                         selected = endMode == RepeatEndMode.NEVER,
                         onClick = { endMode = RepeatEndMode.NEVER },
                     ) {
-                        Text("永不")
+                        Text("永不", fontSize = 16.sp)
                     }
                     var showUntilDatePicker by remember { mutableStateOf(false) }
                     if (showUntilDatePicker) {
@@ -2597,13 +2615,13 @@ private fun RepeatEditorDialog(
                         selected = endMode == RepeatEndMode.UNTIL,
                         onClick = { endMode = RepeatEndMode.UNTIL },
                     ) {
-                        Text("于")
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("于", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
-                                .height(45.dp)
-                                .border(1.dp, SaltTheme.colors.text.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 12.dp)
+                                .height(40.dp)
+                                .border(1.dp, SaltTheme.colors.text.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 16.dp)
                                 .clickable {
                                     endMode = RepeatEndMode.UNTIL
                                     showUntilDatePicker = true
@@ -2612,6 +2630,7 @@ private fun RepeatEditorDialog(
                         ) {
                             Text(
                                 text = untilText.ifEmpty { "选择日期" },
+                                fontSize = 16.sp,
                                 color = if (untilText.isEmpty()) SaltTheme.colors.text.copy(alpha = 0.4f)
                                         else SaltTheme.colors.text,
                             )
@@ -2621,21 +2640,24 @@ private fun RepeatEditorDialog(
                         selected = endMode == RepeatEndMode.COUNT,
                         onClick = { endMode = RepeatEndMode.COUNT },
                     ) {
-                        Text("前有")
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Text("前有", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
                         OutlinedTextField(
                             value = countText,
                             onValueChange = {
                                 endMode = RepeatEndMode.COUNT
                                 countText = it.filter(Char::isDigit).take(4)
                             },
-                            modifier = Modifier.width(96.dp),
+                            modifier = Modifier.width(80.dp),
                             singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                textAlign = TextAlign.Center
+                            ),
                             isError = validationError != null && endMode == RepeatEndMode.COUNT,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("次发生")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("次发生", fontSize = 16.sp)
                     }
                     validationError?.let {
                         Text(
@@ -2764,27 +2786,69 @@ private fun WeekdaySelector(
         DayOfWeek.SATURDAY to "六",
         DayOfWeek.SUNDAY to "日",
     )
+    
+    // 计算总宽度和间距，使7个按钮均匀分布
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val horizontalPadding = 32.dp // 16.dp * 2
+    val availableWidth = screenWidth - horizontalPadding
+    val buttonSize = 44.dp
+    val totalButtonWidth = buttonSize * 7
+    val spacing = ((availableWidth - totalButtonWidth) / 6).coerceAtLeast(8.dp)
+    
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(spacing),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
     ) {
         days.forEach { (day, label) ->
             val checked = day in selected
+            val scale by animateFloatAsState(
+                targetValue = if (checked) 1.1f else 1.0f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+                label = "day_scale"
+            )
+            val backgroundColor by animateColorAsState(
+                targetValue = if (checked) SaltTheme.colors.highlight 
+                    else SaltTheme.colors.background,
+                animationSpec = tween(200),
+                label = "day_background"
+            )
+            val contentColor by animateColorAsState(
+                targetValue = if (checked) SaltTheme.colors.background 
+                    else SaltTheme.colors.text,
+                animationSpec = tween(200),
+                label = "day_content"
+            )
+            val borderColor by animateColorAsState(
+                targetValue = if (checked) SaltTheme.colors.highlight 
+                    else SaltTheme.colors.text.copy(alpha = 0.3f),
+                animationSpec = tween(200),
+                label = "day_border"
+            )
+            
             Box(
                 modifier = Modifier
-                    .padding(bottom = 5.dp)
-                    .size(36.dp)
-                    .then(
-                        if (checked) Modifier.background(SaltTheme.colors.highlight, CircleShape)
-                        else Modifier.border(1.dp, SaltTheme.colors.text.copy(alpha = 0.5f), CircleShape)
+                    .size(buttonSize)
+                    .scale(scale)
+                    .background(backgroundColor, CircleShape)
+                    .border(
+                        width = if (checked) 0.dp else 1.5.dp,
+                        color = borderColor,
+                        shape = CircleShape
                     )
-                    .clickable { onChange(if (checked) selected - day else selected + day) },
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = ripple(bounded = true, radius = 22.dp),
+                    ) { onChange(if (checked) selected - day else selected + day) },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (checked) SaltTheme.colors.background else SaltTheme.colors.text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (checked) FontWeight.Bold else FontWeight.Normal,
+                    color = contentColor,
                 )
             }
         }
@@ -3435,6 +3499,7 @@ private fun InlineReminderSection(
     var customDialog      by remember { mutableStateOf<TaskReminderDraft?>(null) }
     var randomDialog      by remember { mutableStateOf<TaskReminderDraft?>(null) }
     var absoluteDialog    by remember { mutableStateOf<TaskReminderDraft?>(null) }
+    var showDateTimePicker by remember { mutableStateOf(false) }
 
     fun upsert(new: TaskReminderDraft) {
         val orig = editingReminder
@@ -3457,7 +3522,14 @@ private fun InlineReminderSection(
     if (showAddPicker) {
         AlertDialog(
             onDismissRequest = { showAddPicker = false },
-            title = { Text("添加提醒") },
+            title = { 
+                Text(
+                    text = "添加提醒",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = SaltTheme.colors.text,
+                ) 
+            },
+            containerColor = SaltTheme.colors.background,
             text = {
                 Column {
                     // 开始时提醒
@@ -3471,7 +3543,12 @@ private fun InlineReminderSection(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("开始时提醒", modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = "开始时提醒",
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = SaltTheme.colors.text,
+                        )
                     }
                     // 到期时提醒
                     TextButton(
@@ -3484,7 +3561,12 @@ private fun InlineReminderSection(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("到期时提醒", modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = "到期时提醒",
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = SaltTheme.colors.text,
+                        )
                     }
                     // 逾期后每天提醒
                     TextButton(
@@ -3501,17 +3583,27 @@ private fun InlineReminderSection(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("逾期后每天提醒", modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = "逾期后每天提醒",
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = SaltTheme.colors.text,
+                        )
                     }
                     // 选择日期和时间
                     TextButton(
                         onClick = {
-                            // 这里应该打开日期时间选择器
+                            showDateTimePicker = true
                             showAddPicker = false
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("选择日期和时间", modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = "选择日期和时间",
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = SaltTheme.colors.text,
+                        )
                     }
                     // 自定义
                     TextButton(
@@ -3521,14 +3613,23 @@ private fun InlineReminderSection(
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("自定义", modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = "自定义",
+                            modifier = Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = SaltTheme.colors.text,
+                        )
                     }
                 }
             },
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { showAddPicker = false }) {
-                    Text("取消")
+                    Text(
+                        text = "取消",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = SaltTheme.colors.highlight,
+                    )
                 }
             }
         )
@@ -3550,12 +3651,10 @@ private fun InlineReminderSection(
                 modifier = Modifier.size(24.dp),
             )
             Spacer(modifier = Modifier.width(32.dp))
-            val showError = isNew && reminders.isEmpty() && (dueDate > 0 || startDate > 0)
             Text(
                 text  = "添加提醒",
-                color = if (showError) MaterialTheme.colorScheme.error
-                        else SaltTheme.colors.text.copy(alpha = 0.38f),
-                style = MaterialTheme.typography.bodyLarge,
+                color = SaltTheme.colors.text.copy(alpha = 0.48f),
+                fontSize = 16.sp,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -3573,6 +3672,65 @@ private fun InlineReminderSection(
         HorizontalDivider(
             modifier = Modifier.padding(start = 76.dp),
             color = SaltTheme.colors.stroke.copy(alpha = 0.16f),
+        )
+    }
+
+    // 显示自定义提醒对话框
+    customDialog?.let { reminder ->
+        CustomRelativeReminderDialog(
+            reminder = reminder,
+            onDismiss = {
+                customDialog = null
+                editingReminder = null
+            },
+            onConfirm = {
+                upsert(it)
+                customDialog = null
+            },
+        )
+    }
+
+    // 显示随机提醒对话框
+    randomDialog?.let { reminder ->
+        RandomReminderDialog(
+            reminder = reminder,
+            onDismiss = {
+                randomDialog = null
+                editingReminder = null
+            },
+            onConfirm = {
+                upsert(it)
+                randomDialog = null
+            },
+        )
+    }
+
+    // 显示绝对时间提醒对话框（选择日期和时间）
+    absoluteDialog?.let { reminder ->
+        AbsoluteReminderDialog(
+            reminder = reminder,
+            settings = settings,
+            onDismiss = {
+                absoluteDialog = null
+                editingReminder = null
+            },
+            onConfirm = {
+                upsert(it)
+                absoluteDialog = null
+            },
+        )
+    }
+
+    // 显示日期时间选择器（从"选择日期和时间"选项进入）
+    if (showDateTimePicker) {
+        AbsoluteReminderDialog(
+            reminder = TaskReminderDraft(time = 0L, type = Alarm.TYPE_DATE_TIME),
+            settings = settings,
+            onDismiss = { showDateTimePicker = false },
+            onConfirm = {
+                upsert(it)
+                showDateTimePicker = false
+            },
         )
     }
 }

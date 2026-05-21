@@ -2,6 +2,7 @@ package com.qingguang.qingnote
 
 import android.app.Application
 import com.qingguang.qingnote.db.repo.TagNoteRepo
+import com.qingguang.qingnote.tasks.TasksRepository
 import com.qingguang.qingnote.utils.SettingsPreferences
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -47,4 +48,5 @@ class App : Application() {
 @EntryPoint
 interface AppEntryPoint {
     fun tagNoteRepo(): TagNoteRepo
+    fun tasksRepository(): TasksRepository
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import org.tasks.data.entity.Task
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -71,6 +73,7 @@ fun CalenderPage(navController: NavHostController) {
     val today = remember { LocalDate.now() }
     var currentLocalDate by remember { mutableStateOf(LocalDate.now()) }
     val filterList: SnapshotStateList<NoteShowBean> = remember { mutableStateListOf<NoteShowBean>() }
+    val taskList: SnapshotStateList<Task> = remember { mutableStateListOf<Task>() }
     val scope = rememberCoroutineScope()
 
     val calendarState: CalendarState = rememberCalendarState(
@@ -81,11 +84,21 @@ fun CalenderPage(navController: NavHostController) {
     )
 
     LaunchedEffect(currentLocalDate) {
-        // 这里是 currentLocalDate 变化后的操作
-        // 例如，在此处可以打印当前日期
         lunchIo {
             filterList.clear()
             filterList.addAll(noteViewModel.getNotesOnSelectedDate(currentLocalDate))
+            
+            // 加载截止日期为当天的任务
+            val zone = java.time.ZoneId.systemDefault()
+            val start = currentLocalDate.atStartOfDay(zone).toInstant().toEpochMilli()
+            val end = currentLocalDate.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli() - 1
+            val entryPoint = dagger.hilt.EntryPoints.get(
+                com.qingguang.qingnote.App.instance,
+                com.qingguang.qingnote.AppEntryPoint::class.java
+            )
+            val tasks = entryPoint.tasksRepository().getTasksByDueDate(start, end)
+            taskList.clear()
+            taskList.addAll(tasks)
         }
     }
 
@@ -122,7 +135,8 @@ fun CalenderPage(navController: NavHostController) {
                 }
             }
 
-            if (filterList.isEmpty()) {
+            // 笔记列表
+            if (filterList.isEmpty() && taskList.isEmpty()) {
                 item {
                     EmptyComponent(
                         Modifier
@@ -136,6 +150,32 @@ fun CalenderPage(navController: NavHostController) {
                 items(count = filterList.size, key = { it }) { index ->
                     CardCalender(noteShowBean = filterList[index], navController)
                 }
+            }
+
+            // 任务分隔线
+            if (taskList.isNotEmpty()) {
+                item {
+                    Column {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "任务",
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = SaltTheme.colors.text
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
+
+            // 任务列表
+            if (taskList.isNotEmpty()) {
+                items(count = taskList.size, key = { "task_${it}" }) { index ->
+                    TaskCalendarItem(task = taskList[index])
+                }
+            }
+
+            if (filterList.isNotEmpty() || taskList.isNotEmpty()) {
                 item {
                     Spacer(modifier = Modifier.height(100.dp))
                 }
@@ -189,4 +229,35 @@ fun IndexTopBar(
             }
         },
     )
+}
+
+@Composable
+fun TaskCalendarItem(task: Task) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 完成复选框
+        androidx.compose.material3.Checkbox(
+            checked = task.completionDate > 0,
+            onCheckedChange = null // 只显示，不交互
+        )
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        // 标题
+        Text(
+            text = task.title ?: "",
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge,
+            textDecoration = if (task.completionDate > 0) 
+                androidx.compose.ui.text.style.TextDecoration.LineThrough 
+            else null,
+            color = if (task.completionDate > 0) 
+                SaltTheme.colors.subText 
+            else SaltTheme.colors.text
+        )
+    }
 }

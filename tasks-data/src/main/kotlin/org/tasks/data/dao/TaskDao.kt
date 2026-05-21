@@ -97,6 +97,9 @@ FROM (
     @Query("SELECT * FROM tasks")
     abstract suspend fun getAll(): List<Task>
 
+    @Query("SELECT * FROM tasks WHERE dueDate BETWEEN :start AND :end AND deleted = 0")
+    abstract suspend fun getTasksByDueDate(start: Long, end: Long): List<Task>
+
     @Query("SELECT _id FROM tasks")
     abstract suspend fun getAllTaskIds(): List<Long>
 

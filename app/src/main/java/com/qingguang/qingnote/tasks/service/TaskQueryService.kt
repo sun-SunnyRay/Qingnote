@@ -206,4 +206,7 @@ class TaskQueryService @Inject constructor(
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
             .toEpochMilli() - 1
+
+    suspend fun getTasksByDueDate(start: Long, end: Long): List<Task> =
+        taskDao.getTasksByDueDate(start, end)
 }

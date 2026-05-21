@@ -79,4 +79,7 @@ class TasksRepository @Inject constructor(
 
     suspend fun getEditExtras(task: Task): TaskEditExtras =
         queryService.getEditExtras(task)
+
+    suspend fun getTasksByDueDate(start: Long, end: Long): List<Task> =
+        queryService.getTasksByDueDate(start, end)
 }

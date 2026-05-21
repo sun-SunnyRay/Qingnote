@@ -108,7 +108,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePickerDefaults
@@ -2594,7 +2596,7 @@ private fun RepeatEditorDialog(
                             text = {
                                 DatePicker(
                                     state = untilPickerState,
-                                    title = {},
+                                    title = { Text("选择日期") },
                                     showModeToggle = false,
                                 )
                             },
@@ -3289,7 +3291,11 @@ private fun CustomRelativeReminderDialog(
                     ) {
                         RadioButton(
                             selected = selectedUnit == unit,
-                            onClick = { selectedUnit = unit }
+                            onClick = { selectedUnit = unit },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = SaltTheme.colors.highlight,
+                                unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
+                            )
                         )
                         Text(
                             text = unit.label(amount ?: 0),
@@ -3300,27 +3306,33 @@ private fun CustomRelativeReminderDialog(
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                TextButton(
+                                OutlinedButton(
                                     onClick = { relation = ReminderRelation.BEFORE },
-                                    modifier = Modifier
-                                        .border(
-                                            1.dp,
-                                            if (relation == ReminderRelation.BEFORE) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f),
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.width(80.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        containerColor = if (relation == ReminderRelation.BEFORE) SaltTheme.colors.highlight.copy(alpha = 0.1f) else Color.Transparent,
+                                        contentColor = if (relation == ReminderRelation.BEFORE) SaltTheme.colors.highlight else SaltTheme.colors.text
+                                    ),
+                                    border = BorderStroke(
+                                        1.dp,
+                                        if (relation == ReminderRelation.BEFORE) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f)
+                                    )
                                 ) {
                                     Text("前")
                                 }
-                                TextButton(
+                                OutlinedButton(
                                     onClick = { relation = ReminderRelation.AFTER },
-                                    modifier = Modifier
-                                        .border(
-                                            1.dp,
-                                            if (relation == ReminderRelation.AFTER) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f),
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.width(80.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        containerColor = if (relation == ReminderRelation.AFTER) SaltTheme.colors.highlight.copy(alpha = 0.1f) else Color.Transparent,
+                                        contentColor = if (relation == ReminderRelation.AFTER) SaltTheme.colors.highlight else SaltTheme.colors.text
+                                    ),
+                                    border = BorderStroke(
+                                        1.dp,
+                                        if (relation == ReminderRelation.AFTER) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f)
+                                    )
                                 ) {
                                     Text("到期")
                                 }
@@ -3331,62 +3343,77 @@ private fun CustomRelativeReminderDialog(
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 
-                // Anchor selection (start/due date)
+                // Anchor selection (start/due date) - compact layout
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    RadioButton(
-                        selected = anchor == ReminderAnchor.START,
-                        onClick = { anchor = ReminderAnchor.START }
-                    )
-                    Text("开始日期", modifier = Modifier.weight(1f))
-                    RadioButton(
-                        selected = anchor == ReminderAnchor.DUE,
-                        onClick = { anchor = ReminderAnchor.DUE }
-                    )
-                    Text("截止日期")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { anchor = ReminderAnchor.START }
+                    ) {
+                        RadioButton(
+                            selected = anchor == ReminderAnchor.START,
+                            onClick = { anchor = ReminderAnchor.START },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = SaltTheme.colors.highlight,
+                                unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
+                            )
+                        )
+                        Text("开始日期")
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { anchor = ReminderAnchor.DUE }
+                    ) {
+                        RadioButton(
+                            selected = anchor == ReminderAnchor.DUE,
+                            onClick = { anchor = ReminderAnchor.DUE },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = SaltTheme.colors.highlight,
+                                unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
+                            )
+                        )
+                        Text("截止日期")
+                    }
                 }
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 
-                // Repeat option
+                // Repeat option - simplified like original
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RadioButton(
                         selected = !repeatEnabled,
-                        onClick = { repeatEnabled = false }
+                        onClick = { repeatEnabled = false },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = SaltTheme.colors.highlight,
+                            unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
+                        )
                     )
                     Text("不重复", modifier = Modifier.weight(1f))
                 }
                 
                 if (repeatEnabled) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = intervalText,
-                        onValueChange = { intervalText = it.filter(Char::isDigit).take(4) },
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        isError = intervalAmount == null || intervalAmount <= 0,
-                        label = { Text("每隔") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
-                    ReminderUnit.values().forEach { unit ->
-                        RepeatOptionRow(unit.label(intervalAmount ?: 0), intervalUnit == unit) {
-                            intervalUnit = unit
-                        }
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = repeatText,
+                            onValueChange = { repeatText = it.filter(Char::isDigit).take(3) },
+                            modifier = Modifier.width(100.dp),
+                            singleLine = true,
+                            isError = repeatCount == null || repeatCount <= 0,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
+                        Text("次")
                     }
-                    OutlinedTextField(
-                        value = repeatText,
-                        onValueChange = { repeatText = it.filter(Char::isDigit).take(3) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        isError = repeatCount == null || repeatCount <= 0,
-                        label = { Text("重复次数") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
                 }
                 
                 if (validationError != null) {

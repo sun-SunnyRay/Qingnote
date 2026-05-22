@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -279,6 +280,8 @@ fun TaskSettingsPage(navController: NavHostController) {
     if (showTagsDialog) {
         AlertDialog(
             onDismissRequest = { showTagsDialog = false },
+            containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("默认标签") },
             text = {
                 OutlinedTextField(
@@ -307,6 +310,8 @@ fun TaskSettingsPage(navController: NavHostController) {
     if (showDefaultListDialog) {
         AlertDialog(
             onDismissRequest = { showDefaultListDialog = false },
+            containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("默认清单") },
             text = {
                 OutlinedTextField(
@@ -335,6 +340,8 @@ fun TaskSettingsPage(navController: NavHostController) {
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
+            containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("重置任务设置") },
             text = { Text("将任务设置恢复为默认值。") },
             confirmButton = {

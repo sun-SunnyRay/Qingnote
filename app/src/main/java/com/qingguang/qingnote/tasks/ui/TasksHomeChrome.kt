@@ -265,6 +265,8 @@ fun TasksHomeActions(
     if (showDeleteListDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteListDialog = false },
+            containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("删除清单") },
             text = { Text("删除“${uiState.selectedTag.orEmpty()}”清单？任务本身不会被删除。") },
             confirmButton = {
@@ -760,6 +762,8 @@ private fun TaskSearchDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("搜索任务") },
         text = {
             OutlinedTextField(
@@ -806,6 +810,8 @@ private fun TaskListNameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text(title) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -900,6 +906,8 @@ private fun TaskListPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("选择清单") },
         text = {
             TaskDrawerList(

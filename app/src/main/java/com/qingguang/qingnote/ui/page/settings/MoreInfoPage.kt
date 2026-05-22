@@ -59,7 +59,8 @@ import com.moriafly.salt.ui.UnstableSaltApi
 @Composable
 fun ContactDialog(block: () -> Unit) {
     AlertDialog(
-        containerColor = SaltTheme.colors.background,
+        containerColor = Color.White,
+        tonalElevation = 0.dp,
         onDismissRequest = { },
         title = {
             androidx.compose.material3.Text(

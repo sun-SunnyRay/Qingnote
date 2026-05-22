@@ -1,6 +1,7 @@
 package com.qingguang.qingnote.tasks.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -938,23 +939,44 @@ private fun TaskNavigationDrawer(
     onSettingsClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    var animateTrigger by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        animateTrigger = true
+    }
+
+    fun dismissWithAnimation(onComplete: () -> Unit = {}) {
+        scope.launch {
+            animateTrigger = false
+            delay(200)
+            onDismiss()
+            onComplete()
+        }
+    }
+
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { dismissWithAnimation() },
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
+            val alpha by animateFloatAsState(
+                targetValue = if (animateTrigger) 0.28f else 0f,
+                animationSpec = tween(durationMillis = 220),
+                label = "backdropAlpha"
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.28f))
+                    .background(Color.Black.copy(alpha = alpha))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onDismiss,
+                        onClick = { dismissWithAnimation() },
                     )
             )
             AnimatedVisibility(
-                visible = true,
+                visible = animateTrigger,
                 modifier = Modifier.align(Alignment.CenterEnd),
                 enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(220)) + fadeIn(tween(160)),
                 exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(180)) + fadeOut(tween(120)),
@@ -991,17 +1013,23 @@ private fun TaskNavigationDrawer(
                                 availableTags = availableTags,
                                 filterCounts = filterCounts,
                                 settings = settings,
-                                onFilterChanged = onFilterChanged,
-                                onTagChanged = onTagChanged,
-                                onCreateList = onCreateList,
+                                onFilterChanged = { filter ->
+                                    dismissWithAnimation { onFilterChanged(filter) }
+                                },
+                                onTagChanged = { tag ->
+                                    dismissWithAnimation { onTagChanged(tag) }
+                                },
+                                onCreateList = {
+                                    dismissWithAnimation { onCreateList() }
+                                },
                                 showActions = false,
                             )
                         }
                         item { TaskDrawerSection("操作") }
-                        item { TaskDrawerRow("新建清单", onClick = onCreateList) }
-                        item { TaskDrawerRow("清除搜索", enabled = hasSearchQuery, onClick = onClearSearch) }
-                        item { TaskDrawerRow("刷新", onClick = onRefresh) }
-                        item { TaskDrawerRow("任务设置", onClick = onSettingsClick) }
+                        item { TaskDrawerRow("新建清单", onClick = { dismissWithAnimation { onCreateList() } }) }
+                        item { TaskDrawerRow("清除搜索", enabled = hasSearchQuery, onClick = { dismissWithAnimation { onClearSearch() } }) }
+                        item { TaskDrawerRow("刷新", onClick = { dismissWithAnimation { onRefresh() } }) }
+                        item { TaskDrawerRow("任务设置", onClick = { dismissWithAnimation { onSettingsClick() } }) }
                     }
                 }
             }

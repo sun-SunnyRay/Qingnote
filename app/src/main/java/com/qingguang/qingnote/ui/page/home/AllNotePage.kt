@@ -1,6 +1,8 @@
 package com.qingguang.qingnote.ui.page.home
 
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -256,19 +258,33 @@ fun AllNotesPage(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .pointerInput(Unit) {
-                                        var totalDrag = 0f
-                                        detectHorizontalDragGestures(
-                                            onDragStart = { totalDrag = 0f },
-                                            onHorizontalDrag = { _, dragAmount ->
-                                                totalDrag += dragAmount
-                                            },
-                                            onDragEnd = {
-                                                // 向左滑动超过 80px 则打开 drawer
-                                                if (totalDrag < -80f) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                val down = awaitFirstDown(requireUnconsumed = false)
+                                                var totalDrag = 0f
+                                                var isLeftDrag = false
+                                                var dragChecked = false
+                                                
+                                                drag(down.id) { change ->
+                                                    val dragAmount = change.position.x - change.previousPosition.x
+                                                    if (!dragChecked) {
+                                                        if (dragAmount != 0f) {
+                                                            isLeftDrag = dragAmount < 0f
+                                                            dragChecked = true
+                                                        }
+                                                    }
+                                                    
+                                                    if (isLeftDrag) {
+                                                        change.consume()
+                                                        totalDrag += dragAmount
+                                                    }
+                                                }
+                                                
+                                                if (isLeftDrag && totalDrag < -80f) {
                                                     swipeDrawerRequested = true
                                                 }
-                                            },
-                                        )
+                                            }
+                                        }
                                     }
                             ) {
                                 TasksHomeRoute(

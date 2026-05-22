@@ -3701,92 +3701,42 @@ private fun InlineReminderSection(
             text = {
                 Column {
                     // 开始时提醒
-                    TextButton(
-                        onClick = {
-                            onRemindersChange(
-                                (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START))
-                                    .dedupeReminders()
-                            )
-                            showAddPicker = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "开始时提醒",
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = SaltTheme.colors.text,
+                    DialogChoice(text = "开始时提醒") {
+                        onRemindersChange(
+                            (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START))
+                                .dedupeReminders()
                         )
+                        showAddPicker = false
                     }
                     // 到期时提醒
-                    TextButton(
-                        onClick = {
-                            onRemindersChange(
-                                (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END))
-                                    .dedupeReminders()
-                            )
-                            showAddPicker = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "到期时提醒",
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = SaltTheme.colors.text,
+                    DialogChoice(text = "到期时提醒") {
+                        onRemindersChange(
+                            (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END))
+                                .dedupeReminders()
                         )
+                        showAddPicker = false
                     }
                     // 逾期后每天提醒
-                    TextButton(
-                        onClick = {
-                            onRemindersChange(
-                                (reminders + TaskReminderDraft(
-                                    time = ONE_DAY_MILLIS,
-                                    type = Alarm.TYPE_REL_END,
-                                    repeat = 6,
-                                    interval = ONE_DAY_MILLIS
-                                )).dedupeReminders()
-                            )
-                            showAddPicker = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "逾期后每天提醒",
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = SaltTheme.colors.text,
+                    DialogChoice(text = "逾期后每天提醒") {
+                        onRemindersChange(
+                            (reminders + TaskReminderDraft(
+                                time = ONE_DAY_MILLIS,
+                                type = Alarm.TYPE_REL_END,
+                                repeat = 6,
+                                interval = ONE_DAY_MILLIS
+                            )).dedupeReminders()
                         )
+                        showAddPicker = false
                     }
                     // 选择日期和时间
-                    TextButton(
-                        onClick = {
-                            showDateTimePicker = true
-                            showAddPicker = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "选择日期和时间",
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = SaltTheme.colors.text,
-                        )
+                    DialogChoice(text = "选择日期和时间") {
+                        showDateTimePicker = true
+                        showAddPicker = false
                     }
                     // 自定义
-                    TextButton(
-                        onClick = {
-                            customDialog = TaskReminderDraft(time = -15 * ONE_MINUTE_MILLIS, type = Alarm.TYPE_REL_END)
-                            showAddPicker = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "自定义",
-                            modifier = Modifier.fillMaxWidth(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = SaltTheme.colors.text,
-                        )
+                    DialogChoice(text = "自定义") {
+                        customDialog = TaskReminderDraft(time = -15 * ONE_MINUTE_MILLIS, type = Alarm.TYPE_REL_END)
+                        showAddPicker = false
                     }
                 }
             },

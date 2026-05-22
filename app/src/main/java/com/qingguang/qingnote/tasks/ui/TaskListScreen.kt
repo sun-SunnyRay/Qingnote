@@ -2258,7 +2258,7 @@ private fun DateTimeEditorDialog(
             HorizontalDivider(color = SaltTheme.colors.stroke.copy(alpha = 0.25f))
             Column(
                 modifier = Modifier
-                    .heightIn(max = 470.dp)
+                    .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState()),
             ) {
                 DatePicker(

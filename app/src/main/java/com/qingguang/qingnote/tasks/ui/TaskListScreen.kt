@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -2631,15 +2633,43 @@ private fun RepeatEditorDialog(
                             },
                             tonalElevation = 0.dp,
                             properties = DialogProperties(usePlatformDefaultWidth = false),
+                            colors = DatePickerDefaults.colors(
+                                containerColor = Color.White,
+                            ),
                         ) {
-                            DatePicker(
-                                state = untilPickerState,
-                                title = { Text("选择日期", modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
-                                showModeToggle = false,
-                                colors = DatePickerDefaults.colors(
-                                    containerColor = Color.White,
-                                ),
-                            )
+                            BoxWithConstraints(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                val availableWidth = maxWidth
+                                if (availableWidth < 360.dp && availableWidth > 0.dp) {
+                                    val scale = availableWidth / 360.dp
+                                    Box(
+                                        modifier = Modifier
+                                            .requiredWidth(360.dp)
+                                            .scale(scale),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        DatePicker(
+                                            state = untilPickerState,
+                                            title = { Text("选择日期", modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
+                                            showModeToggle = false,
+                                            colors = DatePickerDefaults.colors(
+                                                containerColor = Color.White,
+                                            ),
+                                        )
+                                    }
+                                } else {
+                                    DatePicker(
+                                        state = untilPickerState,
+                                        title = { Text("选择日期", modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
+                                        showModeToggle = false,
+                                        colors = DatePickerDefaults.colors(
+                                            containerColor = Color.White,
+                                        ),
+                                    )
+                                }
+                            }
                         }
                     }
                     RepeatEndRow(

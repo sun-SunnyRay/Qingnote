@@ -42,6 +42,7 @@ import org.tasks.sync.SyncSource
 import org.tasks.data.entity.Alarm
 import javax.inject.Qualifier
 import javax.inject.Singleton
+import com.qingguang.qingnote.tasks.scheduling.TaskAlarmScheduler
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -68,17 +69,31 @@ object TasksBindsModule {
 
     @Provides
     @Singleton
-    fun provideRefreshBroadcaster(): RefreshBroadcaster = object : RefreshBroadcaster {
-        override suspend fun broadcastRefresh() {}
-        override suspend fun broadcastTaskCompleted(taskIds: List<Long>, oldDueDate: Long) {}
+    fun provideRefreshBroadcaster(
+        taskAlarmScheduler: TaskAlarmScheduler
+    ): RefreshBroadcaster = object : RefreshBroadcaster {
+        override suspend fun broadcastRefresh() {
+            taskAlarmScheduler.scheduleNextAlarm()
+        }
+        override suspend fun broadcastTaskCompleted(taskIds: List<Long>, oldDueDate: Long) {
+            taskAlarmScheduler.scheduleNextAlarm()
+        }
     }
 
     @Provides
     @Singleton
-    fun provideNotifier(): Notifier = object : Notifier {
-        override suspend fun cancel(taskId: Long, reason: CancelReason) {}
-        override suspend fun cancel(taskIds: List<Long>, reason: CancelReason) {}
-        override suspend fun triggerNotifications() {}
+    fun provideNotifier(
+        taskAlarmScheduler: TaskAlarmScheduler
+    ): Notifier = object : Notifier {
+        override suspend fun cancel(taskId: Long, reason: CancelReason) {
+            taskAlarmScheduler.scheduleNextAlarm()
+        }
+        override suspend fun cancel(taskIds: List<Long>, reason: CancelReason) {
+            taskAlarmScheduler.scheduleNextAlarm()
+        }
+        override suspend fun triggerNotifications() {
+            taskAlarmScheduler.scheduleNextAlarm()
+        }
         override suspend fun updateTimerNotification() {}
     }
 

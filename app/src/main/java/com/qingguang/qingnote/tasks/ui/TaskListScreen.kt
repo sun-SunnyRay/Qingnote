@@ -86,6 +86,7 @@ import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.SubdirectoryArrowRight
 import androidx.compose.material.icons.outlined.Today
@@ -1531,6 +1532,10 @@ private fun TaskEditorActionSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = if (target == EditorSheetTarget.START_DATE || target == EditorSheetTarget.DUE_DATE)
+            BottomSheetDefaults.ContainerColor
+        else
+            Color.White,
     ) {
         Column(
             modifier = Modifier
@@ -2461,12 +2466,12 @@ private fun RepeatEditorDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Surface(color = SaltTheme.colors.background) {
+        Surface(color = Color.White) {
             Scaffold(
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = SaltTheme.colors.background,
+                            containerColor = Color.White,
                             titleContentColor = SaltTheme.colors.text,
                             navigationIconContentColor = SaltTheme.colors.text,
                             actionIconContentColor = SaltTheme.colors.highlight,
@@ -2593,6 +2598,7 @@ private fun RepeatEditorDialog(
                         val untilPickerState = rememberDatePickerState()
                         AlertDialog(
                             onDismissRequest = { showUntilDatePicker = false },
+                            containerColor = Color.White,
                             text = {
                                 DatePicker(
                                     state = untilPickerState,
@@ -2943,6 +2949,7 @@ private fun RemindersDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("提醒") },
         text = {
             Column(
@@ -3223,9 +3230,7 @@ private fun CustomRelativeReminderDialog(
     var relation by remember(reminder) {
         mutableStateOf(if (reminder.time <= 0L) ReminderRelation.BEFORE else ReminderRelation.AFTER)
     }
-    var anchor by remember(reminder) {
-        mutableStateOf(if (reminder.type == Alarm.TYPE_REL_START) ReminderAnchor.START else ReminderAnchor.DUE)
-    }
+    val anchor = ReminderAnchor.DUE
     var repeatEnabled by remember(reminder) { mutableStateOf(reminder.repeat > 0 && reminder.interval > 0L) }
     val initialIntervalUnit = remember(reminder) { bestReminderUnit(reminder.interval) }
     var intervalText by remember(reminder) {
@@ -3241,6 +3246,17 @@ private fun CustomRelativeReminderDialog(
         mutableStateOf(if (reminder.interval > 0L) initialIntervalUnit else ReminderUnit.MINUTES)
     }
     var repeatText by remember(reminder) { mutableStateOf((reminder.repeat.takeIf { it > 0 } ?: 4).toString()) }
+    var showRecurringDialog by remember { mutableStateOf(false) }
+
+    val repeatLabel = remember(repeatEnabled, repeatText, intervalText, intervalUnit) {
+        val count = repeatText.toIntOrNull() ?: 0
+        val amt = intervalText.toIntOrNull() ?: 0
+        if (repeatEnabled && count > 0 && amt > 0) {
+            "每 $amt ${intervalUnit.label}，重复 $count 次"
+        } else {
+            "不重复"
+        }
+    }
 
     val amount = amountText.toIntOrNull()
     val intervalAmount = intervalText.toIntOrNull()
@@ -3262,7 +3278,8 @@ private fun CustomRelativeReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("自定义提醒") },
+        containerColor = Color.White,
+        title = { Text("自定义通知") },
         text = {
             Column(
                 modifier = Modifier
@@ -3343,76 +3360,36 @@ private fun CustomRelativeReminderDialog(
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 
-                // Anchor selection (start/due date) - compact layout
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { anchor = ReminderAnchor.START }
-                    ) {
-                        RadioButton(
-                            selected = anchor == ReminderAnchor.START,
-                            onClick = { anchor = ReminderAnchor.START },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = SaltTheme.colors.highlight,
-                                unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
-                            )
-                        )
-                        Text("开始日期")
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { anchor = ReminderAnchor.DUE }
-                    ) {
-                        RadioButton(
-                            selected = anchor == ReminderAnchor.DUE,
-                            onClick = { anchor = ReminderAnchor.DUE },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = SaltTheme.colors.highlight,
-                                unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
-                            )
-                        )
-                        Text("截止日期")
-                    }
-                }
-                
-                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                
-                // Repeat option - simplified like original
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showRecurringDialog = true }
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    RadioButton(
-                        selected = !repeatEnabled,
-                        onClick = { repeatEnabled = false },
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = SaltTheme.colors.highlight,
-                            unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
-                        )
+                    Icon(
+                        imageVector = Icons.Outlined.Sync,
+                        contentDescription = null,
+                        tint = if (repeatEnabled) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f),
+                        modifier = Modifier.size(24.dp)
                     )
-                    Text("不重复", modifier = Modifier.weight(1f))
-                }
-                
-                if (repeatEnabled) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = repeatText,
-                            onValueChange = { repeatText = it.filter(Char::isDigit).take(3) },
-                            modifier = Modifier.width(100.dp),
-                            singleLine = true,
-                            isError = repeatCount == null || repeatCount <= 0,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        )
-                        Text("次")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = repeatLabel,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (repeatEnabled) {
+                        IconButton(
+                            onClick = {
+                                repeatEnabled = false
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "清除重复",
+                                tint = SaltTheme.colors.text.copy(alpha = 0.4f)
+                            )
+                        }
                     }
                 }
                 
@@ -3451,6 +3428,115 @@ private fun CustomRelativeReminderDialog(
             }
         },
     )
+
+    if (showRecurringDialog) {
+        var tempIntervalText by remember { mutableStateOf(intervalText) }
+        var tempIntervalUnit by remember { mutableStateOf(intervalUnit) }
+        var tempRepeatText by remember { mutableStateOf(repeatText) }
+        
+        val tempIntervalAmount = tempIntervalText.toIntOrNull()
+        val tempRepeatCount = tempRepeatText.toIntOrNull()
+        
+        val subValidationError = when {
+            tempIntervalAmount == null || tempIntervalAmount <= 0 -> "重复间隔必须大于 0"
+            tempRepeatCount == null || tempRepeatCount <= 0 -> "重复次数必须大于 0"
+            else -> null
+        }
+        
+        AlertDialog(
+            onDismissRequest = { showRecurringDialog = false },
+            containerColor = Color.White,
+            title = { Text("重复") },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    OutlinedTextField(
+                        value = tempIntervalText,
+                        onValueChange = { tempIntervalText = it.filter(Char::isDigit).take(4) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = tempIntervalAmount == null || tempIntervalAmount <= 0,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        label = { Text("重复间隔") }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    ReminderUnit.values().forEach { unit ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { tempIntervalUnit = unit }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                           RadioButton(
+                               selected = tempIntervalUnit == unit,
+                               onClick = { tempIntervalUnit = unit },
+                               colors = RadioButtonDefaults.colors(
+                                   selectedColor = SaltTheme.colors.highlight,
+                                   unselectedColor = SaltTheme.colors.text.copy(alpha = 0.3f)
+                               )
+                           )
+                           Text(
+                               text = unit.label(tempIntervalAmount ?: 0),
+                               modifier = Modifier.weight(1f)
+                           )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = tempRepeatText,
+                            onValueChange = { tempRepeatText = it.filter(Char::isDigit).take(3) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            isError = tempRepeatCount == null || tempRepeatCount <= 0,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            label = { Text("重复次数") }
+                        )
+                        Text("次")
+                    }
+                    
+                    if (subValidationError != null) {
+                        Text(
+                            text = subValidationError,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = subValidationError == null,
+                    onClick = {
+                        intervalText = tempIntervalText
+                        intervalUnit = tempIntervalUnit
+                        repeatText = tempRepeatText
+                        repeatEnabled = true
+                        showRecurringDialog = false
+                    }
+                ) {
+                    Text("确定")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRecurringDialog = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -3611,7 +3697,7 @@ private fun InlineReminderSection(
                     color = SaltTheme.colors.text,
                 ) 
             },
-            containerColor = SaltTheme.colors.background,
+            containerColor = Color.White,
             text = {
                 Column {
                     // 开始时提醒
@@ -3978,6 +4064,7 @@ private fun AttachmentsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("附件") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -4012,6 +4099,7 @@ private fun AttachmentsDialog(
     pendingDelete?.let { attachment ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
+            containerColor = Color.White,
             title = { Text("删除附件") },
             text = { Text("删除“${attachment.name}”？") },
             confirmButton = {
@@ -4133,6 +4221,7 @@ private fun TextValueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text(title) },
         text = {
             OutlinedTextField(

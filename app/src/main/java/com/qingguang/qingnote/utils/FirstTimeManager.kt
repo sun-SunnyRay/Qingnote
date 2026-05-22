@@ -44,7 +44,9 @@ import com.moriafly.salt.ui.ItemOutSpacer
 import com.moriafly.salt.ui.SaltTheme
 import com.moriafly.salt.ui.UnstableSaltApi
 import com.moriafly.salt.ui.dialog.BasicDialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class FirstTimeManager @Inject constructor() {
@@ -52,10 +54,10 @@ class FirstTimeManager @Inject constructor() {
     @Inject
     lateinit var tagNoteRepo: TagNoteRepo
 
-    suspend fun generateIntroduceNoteList() {
+    suspend fun generateIntroduceNoteList() = withContext(Dispatchers.IO) {
         try {
             if (!SettingsPreferences.firstLaunch.first()) {
-                return
+                return@withContext
             }
             if (App.instance.isSystemLanguageEnglish()) {
                 generateEnglishIntroduceNoteList()

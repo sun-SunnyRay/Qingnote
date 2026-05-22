@@ -658,6 +658,7 @@ private fun TaskBatchMoveDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("移动到清单") },
         text = {
             LazyColumn(
@@ -723,6 +724,7 @@ private fun BatchDateActionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("批量日期") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -754,6 +756,7 @@ private fun BatchPriorityDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("批量优先级") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -789,6 +792,7 @@ private fun BatchTagsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("批量标签") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1440,6 +1444,7 @@ private fun TaskEditorDialog(
     if (showUnsavedChangesDialog) {
         AlertDialog(
             onDismissRequest = { showUnsavedChangesDialog = false },
+            containerColor = Color.White,
             title = { Text("放弃更改？") },
             text = { Text("当前任务有未保存的更改。") },
             confirmButton = {
@@ -1469,6 +1474,7 @@ private fun TaskEditorDialog(
     if (showExactAlarmDialog) {
         AlertDialog(
             onDismissRequest = { showExactAlarmDialog = false },
+            containerColor = Color.White,
             title = { Text("需要提醒权限") },
             text = { Text("系统需要允许精确闹钟后，任务提醒才能准时触发。") },
             confirmButton = {
@@ -2390,6 +2396,7 @@ private fun EditorTimePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         text = {
             TimePicker(state = state)
         },
@@ -3152,6 +3159,7 @@ private fun AbsoluteReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("具体时间") },
         text = {
             Column(
@@ -3563,6 +3571,7 @@ private fun RandomReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = Color.White,
         title = { Text("随机提醒") },
         text = {
             Column(

@@ -659,6 +659,7 @@ private fun TaskBatchMoveDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("移动到清单") },
         text = {
             LazyColumn(
@@ -725,6 +726,7 @@ private fun BatchDateActionDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("批量日期") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -757,6 +759,7 @@ private fun BatchPriorityDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("批量优先级") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -793,6 +796,7 @@ private fun BatchTagsDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("批量标签") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1445,6 +1449,7 @@ private fun TaskEditorDialog(
         AlertDialog(
             onDismissRequest = { showUnsavedChangesDialog = false },
             containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("放弃更改？") },
             text = { Text("当前任务有未保存的更改。") },
             confirmButton = {
@@ -1475,6 +1480,7 @@ private fun TaskEditorDialog(
         AlertDialog(
             onDismissRequest = { showExactAlarmDialog = false },
             containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("需要提醒权限") },
             text = { Text("系统需要允许精确闹钟后，任务提醒才能准时触发。") },
             confirmButton = {
@@ -2397,6 +2403,7 @@ private fun EditorTimePickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         text = {
             TimePicker(state = state)
         },
@@ -2606,6 +2613,7 @@ private fun RepeatEditorDialog(
                         AlertDialog(
                             onDismissRequest = { showUntilDatePicker = false },
                             containerColor = Color.White,
+                            tonalElevation = 0.dp,
                             text = {
                                 DatePicker(
                                     state = untilPickerState,
@@ -2957,6 +2965,7 @@ private fun RemindersDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("提醒") },
         text = {
             Column(
@@ -3160,6 +3169,7 @@ private fun AbsoluteReminderDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("具体时间") },
         text = {
             Column(
@@ -3287,6 +3297,7 @@ private fun CustomRelativeReminderDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("自定义通知") },
         text = {
             Column(
@@ -3454,6 +3465,7 @@ private fun CustomRelativeReminderDialog(
         AlertDialog(
             onDismissRequest = { showRecurringDialog = false },
             containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("重复") },
             text = {
                 Column(
@@ -3572,6 +3584,7 @@ private fun RandomReminderDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("随机提醒") },
         text = {
             Column(
@@ -4024,6 +4037,7 @@ private fun AttachmentsDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text("附件") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -4059,6 +4073,7 @@ private fun AttachmentsDialog(
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
             containerColor = Color.White,
+            tonalElevation = 0.dp,
             title = { Text("删除附件") },
             text = { Text("删除“${attachment.name}”？") },
             confirmButton = {
@@ -4181,6 +4196,7 @@ private fun TextValueDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = Color.White,
+        tonalElevation = 0.dp,
         title = { Text(title) },
         text = {
             OutlinedTextField(

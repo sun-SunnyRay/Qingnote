@@ -98,6 +98,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -2272,7 +2273,10 @@ private fun DateTimeEditorDialog(
                     title = {},
                     showModeToggle = false,
                     colors = DatePickerDefaults.colors(
-                        containerColor = SaltTheme.colors.background,
+                        containerColor = if (picker == EditorPicker.START || picker == EditorPicker.DUE)
+                            SaltTheme.colors.background
+                        else
+                            Color.White,
                     ),
                 )
             }
@@ -2610,17 +2614,8 @@ private fun RepeatEditorDialog(
                     var showUntilDatePicker by remember { mutableStateOf(false) }
                     if (showUntilDatePicker) {
                         val untilPickerState = rememberDatePickerState()
-                        AlertDialog(
+                        DatePickerDialog(
                             onDismissRequest = { showUntilDatePicker = false },
-                            containerColor = Color.White,
-                            tonalElevation = 0.dp,
-                            text = {
-                                DatePicker(
-                                    state = untilPickerState,
-                                    title = { Text("选择日期") },
-                                    showModeToggle = false,
-                                )
-                            },
                             confirmButton = {
                                 TextButton(onClick = {
                                     untilPickerState.selectedDateMillis?.let { ms ->
@@ -2634,7 +2629,18 @@ private fun RepeatEditorDialog(
                             dismissButton = {
                                 TextButton(onClick = { showUntilDatePicker = false }) { Text("取消") }
                             },
-                        )
+                            tonalElevation = 0.dp,
+                            properties = DialogProperties(usePlatformDefaultWidth = false),
+                        ) {
+                            DatePicker(
+                                state = untilPickerState,
+                                title = { Text("选择日期", modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
+                                showModeToggle = false,
+                                colors = DatePickerDefaults.colors(
+                                    containerColor = Color.White,
+                                ),
+                            )
+                        }
                     }
                     RepeatEndRow(
                         selected = endMode == RepeatEndMode.UNTIL,
@@ -3040,7 +3046,12 @@ private fun RemindersDialog(
                     showCustomTime = !showCustomTime
                 }
                 if (showCustomTime) {
-                    DatePicker(state = datePickerState)
+                    DatePicker(
+                        state = datePickerState,
+                        colors = DatePickerDefaults.colors(
+                            containerColor = Color.White,
+                        ),
+                    )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedTextField(
                             value = hourText,
@@ -3177,7 +3188,12 @@ private fun AbsoluteReminderDialog(
                     .heightIn(max = 560.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                DatePicker(state = datePickerState)
+                DatePicker(
+                    state = datePickerState,
+                    colors = DatePickerDefaults.colors(
+                        containerColor = Color.White,
+                    ),
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
                         value = hourText,

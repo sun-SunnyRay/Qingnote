@@ -126,12 +126,22 @@ private val TaskListIconOptions = listOf(
 fun TasksHomeActions(
     viewModel: TaskListViewModel,
     onSettingsClick: () -> Unit,
+    externalShowDrawer: Boolean = false,
+    onDrawerDismissed: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val settings by SettingsPreferences.taskSettings.collectAsState(TaskSettings())
     val scope = rememberCoroutineScope()
     var showSearchDialog by rememberSaveable { mutableStateOf(false) }
     var showDrawer by rememberSaveable { mutableStateOf(false) }
+
+    // 响应外部触发的 drawer 打开请求（如滑动手势）
+    LaunchedEffect(externalShowDrawer) {
+        if (externalShowDrawer && !showDrawer) {
+            showDrawer = true
+            onDrawerDismissed()
+        }
+    }
     var showListPicker by rememberSaveable { mutableStateOf(false) }
     var showCreateListDialog by rememberSaveable { mutableStateOf(false) }
     var showRenameListDialog by rememberSaveable { mutableStateOf(false) }

@@ -1,5 +1,7 @@
 package com.qingguang.qingnote.ui.page.home
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -133,6 +135,7 @@ fun AllNotesPage(
     val taskListViewModel: TaskListViewModel = hiltViewModel()
 
     var isTasksMode by rememberSaveable { mutableStateOf(false) }
+    var swipeDrawerRequested by remember { mutableStateOf(false) }
     val homePagerState = rememberPagerState(initialPage = if (isTasksMode) 1 else 0) { 2 }
 
     val sortTime by SharedPreferencesUtils.sortTime.collectAsState(SortTime.UPDATE_TIME_DESC)
@@ -187,6 +190,8 @@ fun AllNotesPage(
                 TasksHomeActions(
                     viewModel = taskListViewModel,
                     onSettingsClick = { navController.navigate(Screen.TaskSettings) },
+                    externalShowDrawer = swipeDrawerRequested,
+                    onDrawerDismissed = { swipeDrawerRequested = false },
                 )
             }
         },
@@ -247,10 +252,30 @@ fun AllNotesPage(
                         }
 
                         1 -> {
-                            TasksHomeRoute(
-                                viewModel = taskListViewModel,
-                                showFloatingActionButton = false,
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .pointerInput(Unit) {
+                                        var totalDrag = 0f
+                                        detectHorizontalDragGestures(
+                                            onDragStart = { totalDrag = 0f },
+                                            onHorizontalDrag = { _, dragAmount ->
+                                                totalDrag += dragAmount
+                                            },
+                                            onDragEnd = {
+                                                // 向左滑动超过 80px 则打开 drawer
+                                                if (totalDrag < -80f) {
+                                                    swipeDrawerRequested = true
+                                                }
+                                            },
+                                        )
+                                    }
+                            ) {
+                                TasksHomeRoute(
+                                    viewModel = taskListViewModel,
+                                    showFloatingActionButton = false,
+                                )
+                            }
                         }
                     }
                 }

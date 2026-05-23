@@ -192,6 +192,7 @@ fun AllNotesPage(
                 TasksHomeActions(
                     viewModel = taskListViewModel,
                     onSettingsClick = { navController.navigate(Screen.TaskSettings) },
+                    onNotificationGuardClick = { navController.navigate(Screen.NotificationGuard) },
                     externalShowDrawer = swipeDrawerRequested,
                     onDrawerDismissed = { swipeDrawerRequested = false },
                 )

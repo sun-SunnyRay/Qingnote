@@ -73,17 +73,22 @@ class NoteViewModel @Inject constructor(private val tagNoteRepo: TagNoteRepo) : 
     var levelMemosMap = mutableStateMapOf<LocalDate, Level>()
         private set
 
-    private suspend fun getLocalDateMap(notes: List<NoteShowBean>) = withContext(Dispatchers.IO) {
-        val sortTime = SharedPreferencesUtils.sortTime.first()
-        val map: MutableMap<LocalDate, Int> = mutableMapOf()
-        notes.forEach {
-            val showTime =
-                if (sortTime == SortTime.UPDATE_TIME_DESC || sortTime == SortTime.UPDATE_TIME_ASC) it.note.updateTime else it.note.createTime
-            val localDate = Instant.ofEpochMilli(showTime).atZone(ZoneId.systemDefault()).toLocalDate()
-            map[localDate] = map.getOrElse(localDate) { 0 } + 1
+    private suspend fun getLocalDateMap(notes: List<NoteShowBean>) {
+        val calculatedMap = withContext(Dispatchers.IO) {
+            val sortTime = SharedPreferencesUtils.sortTime.first()
+            val map: MutableMap<LocalDate, Int> = mutableMapOf()
+            notes.forEach {
+                val showTime =
+                    if (sortTime == SortTime.UPDATE_TIME_DESC || sortTime == SortTime.UPDATE_TIME_ASC) it.note.updateTime else it.note.createTime
+                val localDate = Instant.ofEpochMilli(showTime).atZone(ZoneId.systemDefault()).toLocalDate()
+                map[localDate] = map.getOrElse(localDate) { 0 } + 1
+            }
+            convertToLevelMap(map)
         }
-        levelMemosMap.clear()
-        levelMemosMap.putAll(convertToLevelMap(map))
+        withContext(Dispatchers.Main) {
+            levelMemosMap.clear()
+            levelMemosMap.putAll(calculatedMap)
+        }
     }
 
     private fun convertToLevelMap(inputMap: Map<LocalDate, Int>): Map<LocalDate, Level> {

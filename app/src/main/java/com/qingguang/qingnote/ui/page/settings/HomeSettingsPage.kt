@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Translate
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -234,6 +235,13 @@ fun SettingsPreferenceScreen(navController: NavHostController) {
                         },
                         text = "任务设置",
                         iconPainter = rememberVectorPainter(Icons.Outlined.CheckCircle),
+                    )
+                    Item(
+                        onClick = {
+                            navController.navigate(Screen.NotificationGuard)
+                        },
+                        text = "通知与后台提醒守护",
+                        iconPainter = rememberVectorPainter(Icons.Outlined.Notifications),
                     )
 
                     settingList.forEachIndexed { index, it ->

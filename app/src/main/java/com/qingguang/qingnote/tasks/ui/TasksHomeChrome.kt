@@ -127,6 +127,7 @@ private val TaskListIconOptions = listOf(
 fun TasksHomeActions(
     viewModel: TaskListViewModel,
     onSettingsClick: () -> Unit,
+    onNotificationGuardClick: () -> Unit,
     externalShowDrawer: Boolean = false,
     onDrawerDismissed: () -> Unit = {},
 ) {
@@ -319,6 +320,10 @@ fun TasksHomeActions(
             onSettingsClick = {
                 showDrawer = false
                 onSettingsClick()
+            },
+            onNotificationGuardClick = {
+                showDrawer = false
+                onNotificationGuardClick()
             },
             onDismiss = { showDrawer = false },
         )
@@ -945,6 +950,7 @@ private fun TaskNavigationDrawer(
     onCreateList: () -> Unit,
     onRefresh: () -> Unit,
     onSettingsClick: () -> Unit,
+    onNotificationGuardClick: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var animateTrigger by remember { mutableStateOf(false) }
@@ -1038,6 +1044,7 @@ private fun TaskNavigationDrawer(
                         item { TaskDrawerRow("清除搜索", enabled = hasSearchQuery, onClick = { dismissWithAnimation { onClearSearch() } }) }
                         item { TaskDrawerRow("刷新", onClick = { dismissWithAnimation { onRefresh() } }) }
                         item { TaskDrawerRow("任务设置", onClick = { dismissWithAnimation { onSettingsClick() } }) }
+                        item { TaskDrawerRow("通知与后台提醒守护", onClick = { dismissWithAnimation { onNotificationGuardClick() } }) }
                     }
                 }
             }

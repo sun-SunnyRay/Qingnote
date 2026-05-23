@@ -59,6 +59,9 @@ sealed class Screen {
 
     @Serializable
     object TaskSettings : Screen()
+    
+    @Serializable
+    object NotificationGuard : Screen()
 
     @Serializable
     data class CommentList(val parentNoteId: Long) : Screen()

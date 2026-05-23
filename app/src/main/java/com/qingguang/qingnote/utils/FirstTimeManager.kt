@@ -1,6 +1,7 @@
 package com.qingguang.qingnote.utils
 
 import android.app.Activity
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,15 +57,34 @@ class FirstTimeManager @Inject constructor() {
 
     suspend fun generateIntroduceNoteList() = withContext(Dispatchers.IO) {
         try {
-            if (!SettingsPreferences.firstLaunch.first()) {
+            // 双重安全保障：
+            // 保障一：传统的 DataStore + 实时同步且重启 100% 可靠的 SharedPreferences 作为首启标志
+            val sp = App.instance.getSharedPreferences("QingNoteFirstLaunchPrefs", Context.MODE_PRIVATE)
+            val isSpFirst = sp.getBoolean("is_first_launch", true)
+            
+            if (!isSpFirst) {
                 return@withContext
             }
+            
+            // 保障二：直接检查数据库，如果数据库本身已经不为空，则坚决不再生成示例笔记
+            val allNotes = tagNoteRepo.queryAllNoteList()
+            if (allNotes.isNotEmpty()) {
+                // 如果数据库不为空，即使 sp 判定为首次，也同步把 SP 更新为 false 并退出，防止后续重新生成
+                sp.edit().putBoolean("is_first_launch", false).apply()
+                return@withContext
+            }
+            
+            // 首次启动，且数据库为空，执行创建
             if (App.instance.isSystemLanguageEnglish()) {
                 generateEnglishIntroduceNoteList()
             } else {
                 generateChineseIntroduceNoteList()
             }
-            // 创建成功后，将 firstLaunch 设置为 false
+            
+            // 创建成功后，保存状态
+            sp.edit().putBoolean("is_first_launch", false).apply()
+            
+            // 原有的 DataStore 标志也顺手更新
             SettingsPreferences.changeFirstLaunch(false)
         } catch (e: Exception) {
             e.printStackTrace()

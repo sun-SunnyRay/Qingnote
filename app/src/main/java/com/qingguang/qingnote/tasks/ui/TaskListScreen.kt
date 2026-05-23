@@ -1547,10 +1547,7 @@ private fun TaskEditorActionSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = if (target == EditorSheetTarget.START_DATE || target == EditorSheetTarget.DUE_DATE)
-            BottomSheetDefaults.ContainerColor
-        else
-            Color.White,
+        containerColor = Color.White,
     ) {
         Column(
             modifier = Modifier
@@ -2137,11 +2134,13 @@ private fun DateTimeEditorDialog(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = Color.White,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
+                .imePadding()
         ) {
             DateTimeShortcutGrid(
                 dateShortcuts = {
@@ -2275,10 +2274,7 @@ private fun DateTimeEditorDialog(
                     title = {},
                     showModeToggle = false,
                     colors = DatePickerDefaults.colors(
-                        containerColor = if (picker == EditorPicker.START || picker == EditorPicker.DUE)
-                            SaltTheme.colors.background
-                        else
-                            Color.White,
+                        containerColor = Color.White,
                     ),
                 )
             }
@@ -2615,7 +2611,24 @@ private fun RepeatEditorDialog(
                     }
                     var showUntilDatePicker by remember { mutableStateOf(false) }
                     if (showUntilDatePicker) {
-                        val untilPickerState = rememberDatePickerState()
+                        val initialMillis = remember(untilText) {
+                            untilText.takeIf { it.isNotEmpty() }
+                                ?.let {
+                                    val parts = it.split("-")
+                                    if (parts.size == 3) {
+                                        val y = parts[0].toIntOrNull() ?: 2026
+                                        val m = parts[1].toIntOrNull() ?: 5
+                                        val d = parts[2].toIntOrNull() ?: 22
+                                        java.time.LocalDate.of(y, m, d)
+                                            .atStartOfDay(java.time.ZoneOffset.UTC)
+                                            .toInstant()
+                                            .toEpochMilli()
+                                    } else null
+                                }
+                        }
+                        val untilPickerState = rememberDatePickerState(
+                            initialSelectedDateMillis = initialMillis
+                        )
                         DatePickerDialog(
                             onDismissRequest = { showUntilDatePicker = false },
                             confirmButton = {
@@ -2642,11 +2655,12 @@ private fun RepeatEditorDialog(
                                 contentAlignment = Alignment.Center
                             ) {
                                 val availableWidth = maxWidth
-                                if (availableWidth < 360.dp && availableWidth > 0.dp) {
-                                    val scale = availableWidth / 360.dp
+                                val minWidth = 360.dp
+                                if (availableWidth >= 100.dp && availableWidth < minWidth) {
+                                    val scale = availableWidth / minWidth
                                     Box(
                                         modifier = Modifier
-                                            .requiredWidth(360.dp)
+                                            .requiredWidth(minWidth)
                                             .scale(scale),
                                         contentAlignment = Alignment.Center
                                     ) {

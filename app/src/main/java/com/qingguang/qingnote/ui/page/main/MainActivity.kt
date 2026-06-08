@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 设置全局异常捕获处理
-//        setGlobalExceptionHandler()
+        setGlobalExceptionHandler()
 
         installSplashScreen()
         enableEdgeToEdge()
@@ -55,6 +55,35 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
             handleAuthentication()
+        }
+    }
+
+    private fun setGlobalExceptionHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            val stackTrace = throwable.stackTraceToString()
+            try {
+                val dir = getExternalFilesDir(null)
+                if (dir != null) {
+                    val file = java.io.File(dir, "crash_log.txt")
+                    file.writeText("Crash on thread ${thread.name}:\n" + stackTrace)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            try {
+                val intent = android.content.Intent(this, CrashActivity::class.java).apply {
+                    putExtra("stack_trace", stackTrace)
+                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            android.os.Process.killProcess(android.os.Process.myPid())
+            System.exit(10)
         }
     }
 
@@ -84,8 +113,8 @@ class MainActivity : AppCompatActivity() {
         noteViewModel: NoteViewModel = hiltViewModel(),
         content: @Composable () -> Unit
     ) {
-        val state: NoteState by noteViewModel.state.collectAsState(Dispatchers.IO)
-        val tags by noteViewModel.tags.collectAsState(Dispatchers.IO)
+        val state: NoteState by noteViewModel.state.collectAsState()
+        val tags by noteViewModel.tags.collectAsState()
 
         CompositionLocalProvider(
             LocalMemosViewModel provides noteViewModel,

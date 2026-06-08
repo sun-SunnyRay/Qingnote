@@ -57,34 +57,32 @@ class FirstTimeManager @Inject constructor() {
 
     suspend fun generateIntroduceNoteList() = withContext(Dispatchers.IO) {
         try {
-            // 双重安全保障：
-            // 保障一：传统的 DataStore + 实时同步且重启 100% 可靠的 SharedPreferences 作为首启标志
             val sp = App.instance.getSharedPreferences("QingNoteFirstLaunchPrefs", Context.MODE_PRIVATE)
             val isSpFirst = sp.getBoolean("is_first_launch", true)
             
+            // 只有 SP 标记为首次启动时才创建欢迎笔记
             if (!isSpFirst) {
                 return@withContext
             }
             
-            // 保障二：直接检查数据库，如果数据库本身已经不为空，则坚决不再生成示例笔记
+            // 先用 commit() 同步写入标记，确保即使后续进程被杀也不会重复创建
+            // commit() 是同步磁盘写入，比 apply() 的异步写入更可靠
+            sp.edit().putBoolean("is_first_launch", false).commit()
+            
+            // 再检查数据库是否已有数据（防止覆盖安装等场景）
             val allNotes = tagNoteRepo.queryAllNoteList()
             if (allNotes.isNotEmpty()) {
-                // 如果数据库不为空，即使 sp 判定为首次，也同步把 SP 更新为 false 并退出，防止后续重新生成
-                sp.edit().putBoolean("is_first_launch", false).apply()
                 return@withContext
             }
             
-            // 首次启动，且数据库为空，执行创建
+            // 数据库为空，执行创建欢迎笔记
             if (App.instance.isSystemLanguageEnglish()) {
                 generateEnglishIntroduceNoteList()
             } else {
                 generateChineseIntroduceNoteList()
             }
             
-            // 创建成功后，保存状态
-            sp.edit().putBoolean("is_first_launch", false).apply()
-            
-            // 原有的 DataStore 标志也顺手更新
+            // DataStore 标志也同步更新
             SettingsPreferences.changeFirstLaunch(false)
         } catch (e: Exception) {
             e.printStackTrace()

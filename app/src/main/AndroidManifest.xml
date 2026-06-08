@@ -37,6 +37,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.page.main.CrashActivity"
+            android:process=":crash"
+            android:exported="false"
+            android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

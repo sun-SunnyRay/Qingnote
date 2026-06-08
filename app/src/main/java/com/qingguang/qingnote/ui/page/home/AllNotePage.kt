@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -235,11 +236,11 @@ fun AllNotesPage(
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 items(
-                                    count = noteState.notes.size,
-                                    key = { noteState.notes[it].note.noteId }
-                                ) { index ->
+                                    items = noteState.notes,
+                                    key = { it.note.noteId }
+                                ) { noteShowBean ->
                                     NoteCard(
-                                        noteShowBean = noteState.notes[index],
+                                        noteShowBean = noteShowBean,
                                         navHostController = navController,
                                         onCommentClick = {
                                             parentNoteForComment = it

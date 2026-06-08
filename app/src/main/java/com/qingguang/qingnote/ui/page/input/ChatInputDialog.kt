@@ -81,7 +81,9 @@ fun ChatInputDialog(
     dismiss: () -> Unit
 ) {
     var bottomSheetState by rememberSaveable { mutableStateOf(false) }
-    bottomSheetState = isShow
+    LaunchedEffect(isShow) {
+        bottomSheetState = isShow
+    }
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
@@ -118,9 +120,14 @@ fun ChatInputDialog(
     }
 
     fun submit() = coroutineScope.launch {
-        softwareKeyboardController?.hide()
-        focusRequester.freeFocus()
+        try {
+            softwareKeyboardController?.hide()
+            focusRequester.freeFocus()
+        } catch (_: Exception) {
+            // focusRequester 可能已脱离 composition
+        }
         val content = text.text
+        if (content.isBlank() && memoInputViewModel.uploadAttachments.isEmpty()) return@launch
         memosViewModel.insertOrUpdate(Note(content = content, attachments = memoInputViewModel.uploadAttachments.toList(), parentNoteId = parentNote?.note?.noteId))
         text = TextFieldValue("")
         memoInputViewModel.uploadAttachments.clear()

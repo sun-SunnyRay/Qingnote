@@ -2,6 +2,7 @@ package com.qingguang.qingnote.ui.page
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.qingguang.qingnote.bean.Note
@@ -50,15 +51,14 @@ class NoteViewModel @Inject constructor(private val tagNoteRepo: TagNoteRepo) : 
 
     private val _state = MutableStateFlow(NoteState())
 
-
+    // combine 保持纯函数，不再包含有副作用的 suspend 调用
     val state = combine(_state, _notes) { state, notes ->
-        val sortedNotes = notes.sortedWith(compareByDescending { it.note.isCollected }/*.thenBy { it. }*/)
+        val sortedNotes = notes.sortedWith(compareByDescending { it.note.isCollected })
         val filteredNotes = if (state.searchQuery.isBlank()) {
             sortedNotes
         } else {
             sortedNotes.filter { it.doesMatchSearchQuery(state.searchQuery) }
         }
-        getLocalDateMap(notes)
         state.copy(
             notes = filteredNotes
         )
@@ -73,7 +73,16 @@ class NoteViewModel @Inject constructor(private val tagNoteRepo: TagNoteRepo) : 
     var levelMemosMap = mutableStateMapOf<LocalDate, Level>()
         private set
 
-    private suspend fun getLocalDateMap(notes: List<NoteShowBean>) {
+    init {
+        // 独立监听 _notes 变化，在独立协程中安全更新 levelMemosMap
+        viewModelScope.launch {
+            _notes.collect { notes ->
+                updateLocalDateMap(notes)
+            }
+        }
+    }
+
+    private suspend fun updateLocalDateMap(notes: List<NoteShowBean>) {
         val calculatedMap = withContext(Dispatchers.IO) {
             val sortTime = SharedPreferencesUtils.sortTime.first()
             val map: MutableMap<LocalDate, Int> = mutableMapOf()

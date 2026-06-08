@@ -27,10 +27,10 @@ android {
 
     defaultConfig {
         applicationId = "com.qingguang.qingnote"
-        minSdk = 26
+        minSdk = 23
         targetSdk = 35
-        versionCode = 111
-        versionName = "1.1.1"
+        versionCode = 118
+        versionName = "1.1.8"
         vectorDrawables {
             useSupportLibrary = true
         }

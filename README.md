@@ -66,6 +66,8 @@ GNU GPL v3.0 © [QingNote](https://github.com/sun-SunnyRay/Qingnote/blob/main/LI
 
 Your star is my biggest motivation! **🌟**
 
+> 开发不易，头发渐稀。如果这个项目对你有帮助，请给个 star 吧！你的每一个 star 都是对开发者最大的鼓励，让我有动力继续熬夜写代码（不是）。
+
 ## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=sun-SunnyRay/Qingnote&type=Date)](https://star-history.com/#sun-SunnyRay/Qingnote&Date)

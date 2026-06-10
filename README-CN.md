@@ -65,6 +65,8 @@ GNU GPL v3.0 © [QingNote](https://github.com/sun-SunnyRay/Qingnote/blob/main/LI
 
 您的 star 是我最大的动力！ **🌟**
 
+> 开发不易，头发渐稀。如果这个项目对你有帮助，请给个 star 吧！你的每一个 star 都是对开发者最大的鼓励，让我有动力继续熬夜写代码（不是）。
+
 ## ☕️ 捐助
 可以给我买一杯咖啡，让我更有动力继续开发。
 

@@ -10,9 +10,6 @@ sealed class Screen {
     data object Main : Screen()
 
     @Serializable
-    data object Explore : Screen()
-
-    @Serializable
     data class InputDetail(val id: Long) : Screen()
 
     @Serializable
@@ -46,16 +43,7 @@ sealed class Screen {
     object RandomWalk : Screen()
 
     @Serializable
-    object Gallery : Screen()
-
-    @Serializable
     data class PictureDisplay(val pathList: List<String>, val curIndex: Int, val timestamps: List<Long>) : Screen()
-
-    @Serializable
-    object MoreInfo : Screen()
-
-    @Serializable
-    object DonatePage : Screen()
 
     @Serializable
     object TaskSettings : Screen()

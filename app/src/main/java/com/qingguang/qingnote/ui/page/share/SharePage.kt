@@ -199,7 +199,7 @@ fun SharePage(noteId: Long, navController: NavHostController) {
 
                                         Box(contentAlignment = Alignment.CenterEnd, modifier = Modifier.fillMaxWidth()) {
                                             Text(
-                                                text = "By IdeaMemo",
+                                                text = "By QingNote",
                                                 style = MaterialTheme.typography.labelMedium.copy(fontFamily = FontFamily.Cursive),
                                                 modifier = Modifier.padding(end = 8.dp)
                                             )

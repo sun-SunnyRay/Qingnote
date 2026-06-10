@@ -1,5 +1,6 @@
 package com.qingguang.qingnote.tasks.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -81,10 +82,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.moriafly.salt.ui.SaltTheme
+import com.qingguang.qingnote.R
 import com.qingguang.qingnote.tasks.TaskDrawerTag
 import com.qingguang.qingnote.tasks.TaskSettings
 import com.qingguang.qingnote.tasks.TaskSortMode
@@ -181,7 +184,7 @@ fun TasksHomeActions(
     IconButton(onClick = { showSearchDialog = true }) {
         Icon(
             imageVector = Icons.Outlined.Search,
-            contentDescription = "搜索任务",
+            contentDescription = stringResource(R.string.cd_search_tasks),
             tint = SaltTheme.colors.text,
         )
     }
@@ -239,9 +242,9 @@ fun TasksHomeActions(
     }
     if (showCreateListDialog) {
         TaskListNameDialog(
-            title = "新建清单",
+            title = stringResource(R.string.new_list),
             initialName = "",
-            confirmText = "创建",
+            confirmText = stringResource(R.string.create),
             onDismiss = { showCreateListDialog = false },
             onConfirm = {
                 viewModel.createList(it.name, it.color, it.icon)
@@ -251,11 +254,11 @@ fun TasksHomeActions(
     }
     if (showRenameListDialog) {
         TaskListNameDialog(
-            title = "重命名清单",
+            title = stringResource(R.string.rename_list),
             initialName = uiState.selectedTag.orEmpty(),
             initialColor = selectedTag?.color?.takeIf { it != 0 },
             initialIcon = selectedTag?.icon,
-            confirmText = "保存",
+            confirmText = stringResource(R.string.save),
             onDismiss = { showRenameListDialog = false },
             onConfirm = {
                 viewModel.renameSelectedList(it.name, it.color, it.icon)
@@ -266,10 +269,10 @@ fun TasksHomeActions(
     if (showDeleteListDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteListDialog = false },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("删除清单") },
-            text = { Text("删除“${uiState.selectedTag.orEmpty()}”清单？任务本身不会被删除。") },
+            title = { Text(stringResource(R.string.delete_list)) },
+            text = { Text(stringResource(R.string.delete_list_confirm, uiState.selectedTag.orEmpty())) },
             confirmButton = {
                 TextButton(onClick = {
                     val deleting = uiState.selectedTag.orEmpty()
@@ -279,12 +282,12 @@ fun TasksHomeActions(
                     }
                     showDeleteListDialog = false
                 }) {
-                    Text("删除")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteListDialog = false }) {
-                    Text("取消")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -480,8 +483,8 @@ private fun TaskSortSheetContent(
     ) {
         TaskSortRow(
             icon = Icons.Outlined.ExpandCircleDown,
-            title = "分组",
-            body = state.groupMode.taskSortLabel(),
+            title = stringResource(R.string.sort_group),
+            body = stringResource(state.groupMode.taskSortLabel()),
             ascending = state.groupAscending,
             showAscending = state.groupMode != TaskSortMode.NONE,
             onClick = onGroupClick,
@@ -489,16 +492,16 @@ private fun TaskSortSheetContent(
         )
         TaskSortRow(
             icon = Icons.Outlined.SwapVert,
-            title = "排序",
-            body = state.sortMode.taskSortLabel(),
+            title = stringResource(R.string.sort_sort),
+            body = stringResource(state.sortMode.taskSortLabel()),
             ascending = state.sortAscending,
             onClick = onSortClick,
             onAscendingChanged = onSortAscendingChanged,
         )
         TaskSortRow(
             icon = Icons.Outlined.SubdirectoryArrowRight,
-            title = "子任务",
-            body = state.subtaskMode.taskSortLabel(),
+            title = stringResource(R.string.sort_subtasks),
+            body = stringResource(state.subtaskMode.taskSortLabel()),
             ascending = state.subtaskAscending,
             showAscending = state.subtaskMode != TaskSortMode.MY_ORDER,
             onClick = onSubtaskClick,
@@ -513,7 +516,7 @@ private fun TaskSortSheetContent(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             Text(
-                text = "将已完成任务移至底部",
+                text = stringResource(R.string.sort_completed_at_bottom),
                 color = SaltTheme.colors.text,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f),
@@ -526,8 +529,8 @@ private fun TaskSortSheetContent(
         if (state.completedAtBottom) {
             HorizontalDivider(color = SaltTheme.colors.subText.copy(alpha = 0.18f))
             TaskSortRow(
-                title = "已完成",
-                body = state.completedMode.taskSortLabel(),
+                title = stringResource(R.string.filter_completed),
+                body = stringResource(state.completedMode.taskSortLabel()),
                 ascending = state.completedAscending,
                 onClick = onCompletedClick,
                 onAscendingChanged = onCompletedAscendingChanged,
@@ -557,7 +560,7 @@ private fun TaskSortPickerContent(
     ) {
         options.forEach { option ->
             TaskSortOptionRow(
-                label = option.taskSortLabel(),
+                label = stringResource(option.taskSortLabel()),
                 selected = option == selected,
                 onClick = { onSelected(option) },
             )
@@ -655,26 +658,27 @@ private fun TaskOrderingButton(
             tint = SaltTheme.colors.text,
         )
         Text(
-            text = if (ascending) "升序" else "降序",
+            text = stringResource(if (ascending) R.string.sort_ascending else R.string.sort_descending),
             color = SaltTheme.colors.text,
             style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
 
-private fun TaskSortMode.taskSortLabel(): String =
+@StringRes
+private fun TaskSortMode.taskSortLabel(): Int =
     when (this) {
-        TaskSortMode.NONE -> "无"
-        TaskSortMode.DUE_DATE -> "按截止日期"
-        TaskSortMode.START_DATE -> "按开始日期"
-        TaskSortMode.PRIORITY -> "按优先级"
-        TaskSortMode.TITLE -> "按标题"
-        TaskSortMode.MODIFIED -> "按最后修改"
-        TaskSortMode.CREATED -> "按创建时间"
-        TaskSortMode.LIST -> "按清单"
-        TaskSortMode.COMPLETED -> "按完成时间"
-        TaskSortMode.MY_ORDER -> "我的顺序"
-        TaskSortMode.AUTO -> "智能排序"
+        TaskSortMode.NONE -> R.string.sort_mode_none
+        TaskSortMode.DUE_DATE -> R.string.sort_mode_due_date
+        TaskSortMode.START_DATE -> R.string.sort_mode_start_date
+        TaskSortMode.PRIORITY -> R.string.sort_mode_priority
+        TaskSortMode.TITLE -> R.string.sort_mode_title
+        TaskSortMode.MODIFIED -> R.string.sort_mode_modified
+        TaskSortMode.CREATED -> R.string.sort_mode_created
+        TaskSortMode.LIST -> R.string.sort_mode_list
+        TaskSortMode.COMPLETED -> R.string.sort_mode_completed
+        TaskSortMode.MY_ORDER -> R.string.sort_mode_my_order
+        TaskSortMode.AUTO -> R.string.sort_mode_auto
     }
 
 @Composable
@@ -705,27 +709,27 @@ private fun TaskMoreMenu(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(SaltTheme.colors.popup),
         ) {
-            TaskDropdownItem("选择清单") { onChooseList(); expanded = false }
+            TaskDropdownItem(stringResource(R.string.choose_list)) { onChooseList(); expanded = false }
             if (!selectedListName.isNullOrBlank()) {
-                TaskDropdownItem("重命名清单") { onRenameList(); expanded = false }
-                TaskDropdownItem("删除清单") { onDeleteList(); expanded = false }
+                TaskDropdownItem(stringResource(R.string.rename_list)) { onRenameList(); expanded = false }
+                TaskDropdownItem(stringResource(R.string.delete_list)) { onDeleteList(); expanded = false }
                 TaskDropdownItem(
-                    if (defaultListName.equals(selectedListName, ignoreCase = true)) "取消默认清单" else "设为默认清单"
+                    stringResource(if (defaultListName.equals(selectedListName, ignoreCase = true)) R.string.menu_unset_default_list else R.string.menu_set_default_list)
                 ) { onToggleDefaultList(); expanded = false }
-                TaskDropdownItem("清单上移") { onMoveListUp(); expanded = false }
-                TaskDropdownItem("清单下移") { onMoveListDown(); expanded = false }
+                TaskDropdownItem(stringResource(R.string.menu_move_list_up)) { onMoveListUp(); expanded = false }
+                TaskDropdownItem(stringResource(R.string.menu_move_list_down)) { onMoveListDown(); expanded = false }
             }
-            TaskDropdownItem("新建清单") { onCreateList(); expanded = false }
-            TaskDropdownItem(if (showCompleted) "隐藏已完成" else "显示已完成") {
+            TaskDropdownItem(stringResource(R.string.new_list)) { onCreateList(); expanded = false }
+            TaskDropdownItem(stringResource(if (showCompleted) R.string.menu_hide_completed else R.string.menu_show_completed)) {
                 onToggleCompleted()
                 expanded = false
             }
-            TaskDropdownItem("清除搜索", enabled = hasSearchQuery) {
+            TaskDropdownItem(stringResource(R.string.clear_search), enabled = hasSearchQuery) {
                 onClearSearch()
                 expanded = false
             }
-            TaskDropdownItem("刷新") { onRefresh(); expanded = false }
-            TaskDropdownItem("任务设置") { onSettings(); expanded = false }
+            TaskDropdownItem(stringResource(R.string.refresh)) { onRefresh(); expanded = false }
+            TaskDropdownItem(stringResource(R.string.action_task_settings)) { onSettings(); expanded = false }
         }
     }
 }
@@ -767,9 +771,9 @@ private fun TaskSearchDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("搜索任务") },
+        title = { Text(stringResource(R.string.cd_search_tasks)) },
         text = {
             OutlinedTextField(
                 value = query,
@@ -778,14 +782,14 @@ private fun TaskSearchDialog(
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
                 singleLine = true,
-                placeholder = { Text("任务标题或备注") },
+                placeholder = { Text(stringResource(R.string.search_hint_task)) },
             )
         },
         confirmButton = {
-            TextButton(onClick = { onSearch(query.trim()) }) { Text("搜索") }
+            TextButton(onClick = { onSearch(query.trim()) }) { Text(stringResource(R.string.search)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }
@@ -815,7 +819,7 @@ private fun TaskListNameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = { Text(title) },
         text = {
@@ -827,16 +831,16 @@ private fun TaskListNameDialog(
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
                     singleLine = true,
-                    placeholder = { Text("清单名称") },
+                    placeholder = { Text(stringResource(R.string.list_name_hint)) },
                 )
-                Text("颜色", color = SaltTheme.colors.subText, fontSize = 13.sp)
+                Text(stringResource(R.string.color), color = SaltTheme.colors.subText, fontSize = 13.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     TaskListColorSwatch(null, selectedColor == null) { selectedColor = null }
                     TaskListColorOptions.forEach { color ->
                         TaskListColorSwatch(color, selectedColor == color) { selectedColor = color }
                     }
                 }
-                Text("图标", color = SaltTheme.colors.subText, fontSize = 13.sp)
+                Text(stringResource(R.string.icon), color = SaltTheme.colors.subText, fontSize = 13.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TaskListIconOptions.forEach { option ->
                         TaskListIconChip(option, selectedIcon == option.value) { selectedIcon = option.value }
@@ -853,7 +857,7 @@ private fun TaskListNameDialog(
             ) { Text(confirmText) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }
@@ -911,9 +915,9 @@ private fun TaskListPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("选择清单") },
+        title = { Text(stringResource(R.string.choose_list)) },
         text = {
             TaskDrawerList(
                 filter = filter,
@@ -931,7 +935,7 @@ private fun TaskListPickerDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("关闭") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
         },
     )
 }
@@ -1013,7 +1017,7 @@ private fun TaskNavigationDrawer(
                     ) {
                         item {
                             Text(
-                                text = "任务",
+                                text = stringResource(R.string.drawer_header_tasks),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SaltTheme.colors.text,
@@ -1039,12 +1043,12 @@ private fun TaskNavigationDrawer(
                                 showActions = false,
                             )
                         }
-                        item { TaskDrawerSection("操作") }
-                        item { TaskDrawerRow("新建清单", onClick = { dismissWithAnimation { onCreateList() } }) }
-                        item { TaskDrawerRow("清除搜索", enabled = hasSearchQuery, onClick = { dismissWithAnimation { onClearSearch() } }) }
-                        item { TaskDrawerRow("刷新", onClick = { dismissWithAnimation { onRefresh() } }) }
-                        item { TaskDrawerRow("任务设置", onClick = { dismissWithAnimation { onSettingsClick() } }) }
-                        item { TaskDrawerRow("通知与后台提醒守护", onClick = { dismissWithAnimation { onNotificationGuardClick() } }) }
+                        item { TaskDrawerSection(stringResource(R.string.section_actions)) }
+                        item { TaskDrawerRow(stringResource(R.string.new_list), onClick = { dismissWithAnimation { onCreateList() } }) }
+                        item { TaskDrawerRow(stringResource(R.string.clear_search), enabled = hasSearchQuery, onClick = { dismissWithAnimation { onClearSearch() } }) }
+                        item { TaskDrawerRow(stringResource(R.string.refresh), onClick = { dismissWithAnimation { onRefresh() } }) }
+                        item { TaskDrawerRow(stringResource(R.string.action_task_settings), onClick = { dismissWithAnimation { onSettingsClick() } }) }
+                        item { TaskDrawerRow(stringResource(R.string.action_notification_guard), onClick = { dismissWithAnimation { onNotificationGuardClick() } }) }
                     }
                 }
             }
@@ -1069,22 +1073,22 @@ private fun TaskDrawerList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        TaskDrawerSection("\u667a\u80fd\u6e05\u5355")
-        TaskDrawerRow("\u6211\u7684\u4efb\u52a1", filterCounts[TaskViewFilter.ALL], filter == TaskViewFilter.ALL && selectedTag == null) { onFilterChanged(TaskViewFilter.ALL) }
-        TaskDrawerRow("\u4eca\u5929", filterCounts[TaskViewFilter.TODAY], filter == TaskViewFilter.TODAY) { onFilterChanged(TaskViewFilter.TODAY) }
-        TaskDrawerRow("\u903e\u671f", filterCounts[TaskViewFilter.OVERDUE], filter == TaskViewFilter.OVERDUE) { onFilterChanged(TaskViewFilter.OVERDUE) }
-        TaskDrawerRow("\u4ee5\u540e", filterCounts[TaskViewFilter.UPCOMING], filter == TaskViewFilter.UPCOMING) { onFilterChanged(TaskViewFilter.UPCOMING) }
+        TaskDrawerSection(stringResource(R.string.section_smart_lists))
+        TaskDrawerRow(stringResource(R.string.filter_my_tasks), filterCounts[TaskViewFilter.ALL], filter == TaskViewFilter.ALL && selectedTag == null) { onFilterChanged(TaskViewFilter.ALL) }
+        TaskDrawerRow(stringResource(R.string.today), filterCounts[TaskViewFilter.TODAY], filter == TaskViewFilter.TODAY) { onFilterChanged(TaskViewFilter.TODAY) }
+        TaskDrawerRow(stringResource(R.string.filter_overdue), filterCounts[TaskViewFilter.OVERDUE], filter == TaskViewFilter.OVERDUE) { onFilterChanged(TaskViewFilter.OVERDUE) }
+        TaskDrawerRow(stringResource(R.string.filter_upcoming), filterCounts[TaskViewFilter.UPCOMING], filter == TaskViewFilter.UPCOMING) { onFilterChanged(TaskViewFilter.UPCOMING) }
         if (settings.drawerShowDueFilters) {
-            TaskDrawerRow("\u6709\u622a\u6b62\u65e5\u671f", filterCounts[TaskViewFilter.WITH_DUE_DATE], filter == TaskViewFilter.WITH_DUE_DATE) { onFilterChanged(TaskViewFilter.WITH_DUE_DATE) }
-            TaskDrawerRow("\u65e0\u622a\u6b62\u65e5\u671f", filterCounts[TaskViewFilter.WITHOUT_DUE_DATE], filter == TaskViewFilter.WITHOUT_DUE_DATE) { onFilterChanged(TaskViewFilter.WITHOUT_DUE_DATE) }
+            TaskDrawerRow(stringResource(R.string.filter_with_due_date), filterCounts[TaskViewFilter.WITH_DUE_DATE], filter == TaskViewFilter.WITH_DUE_DATE) { onFilterChanged(TaskViewFilter.WITH_DUE_DATE) }
+            TaskDrawerRow(stringResource(R.string.filter_without_due_date), filterCounts[TaskViewFilter.WITHOUT_DUE_DATE], filter == TaskViewFilter.WITHOUT_DUE_DATE) { onFilterChanged(TaskViewFilter.WITHOUT_DUE_DATE) }
         }
-        TaskDrawerRow("\u5df2\u5b8c\u6210", filterCounts[TaskViewFilter.COMPLETED], filter == TaskViewFilter.COMPLETED) { onFilterChanged(TaskViewFilter.COMPLETED) }
+        TaskDrawerRow(stringResource(R.string.filter_completed), filterCounts[TaskViewFilter.COMPLETED], filter == TaskViewFilter.COMPLETED) { onFilterChanged(TaskViewFilter.COMPLETED) }
 
         val drawerTags = availableTags
             .filter { !settings.drawerHideEmptyTags || it.count > 0 }
         if (drawerTags.isNotEmpty()) {
-            TaskDrawerSection("\u6e05\u5355")
-            TaskDrawerRow("\u5168\u90e8\u6e05\u5355", selected = selectedTag == null) { onTagChanged(null) }
+            TaskDrawerSection(stringResource(R.string.section_lists))
+            TaskDrawerRow(stringResource(R.string.filter_all_lists), selected = selectedTag == null) { onTagChanged(null) }
             drawerTags.forEach { tag ->
                 TaskDrawerRow(
                     text = tag.name,
@@ -1097,8 +1101,8 @@ private fun TaskDrawerList(
             }
         }
         if (showActions) {
-            TaskDrawerSection("\u64cd\u4f5c")
-            TaskDrawerRow("\u65b0\u5efa\u6e05\u5355", onClick = onCreateList)
+            TaskDrawerSection(stringResource(R.string.section_actions))
+            TaskDrawerRow(stringResource(R.string.new_list), onClick = onCreateList)
         }
     }
 }

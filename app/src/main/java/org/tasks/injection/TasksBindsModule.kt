@@ -243,10 +243,8 @@ object TasksBindsModule {
         deletionDao: DeletionDao,
         taskDao: TaskDao,
         refreshBroadcaster: RefreshBroadcaster,
-        vtodoCache: VtodoCache,
-        tasksPreferences: TasksPreferences,
         taskCleanup: TaskCleanup,
     ): TaskDeleter {
-        return TaskDeleter(deletionDao, taskDao, refreshBroadcaster, vtodoCache, tasksPreferences, taskCleanup)
+        return TaskDeleter(deletionDao, taskDao, refreshBroadcaster, taskCleanup)
     }
 }

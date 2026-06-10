@@ -73,34 +73,6 @@ class RepeatTaskHelper(
         return true
     }
 
-    suspend fun undoRepeat(task: Task, oldDueDate: Long) {
-        if (task.completionDate > 0) {
-            task.completionDate = 0
-            taskSaver.save(task)
-            return
-        }
-        try {
-            val recur = newRecur(task.recurrence!!)
-            val count = recur.count
-            if (count > 0) {
-                recur.count = count + 1
-            }
-            task.setRecurrence(recur)
-            val newDueDate = task.dueDate
-            task.setDueDateAdjustingHideUntil(
-                if (oldDueDate > 0) {
-                    oldDueDate
-                } else {
-                    newDueDate - (computeNextDueDate(task, task.recurrence!!, false) - newDueDate)
-                }
-            )
-            rescheduleAlarms(task.id, newDueDate, task.dueDate)
-        } catch (e: ParseException) {
-            Logger.e(e, tag = TAG) { "" }
-        }
-        taskSaver.save(task)
-    }
-
     private suspend fun rescheduleAlarms(taskId: Long, oldDueDate: Long, newDueDate: Long) {
         if (oldDueDate <= 0 || newDueDate <= 0) {
             return

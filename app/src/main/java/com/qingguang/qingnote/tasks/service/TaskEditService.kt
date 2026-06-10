@@ -2,6 +2,7 @@ package com.qingguang.qingnote.tasks.service
 
 import com.qingguang.qingnote.tasks.TaskCalendarWriter
 import com.qingguang.qingnote.tasks.TaskEditData
+import com.qingguang.qingnote.tasks.scheduling.TaskAlarmScheduler
 import org.tasks.data.TaskSaver
 import org.tasks.data.dao.TaskDao
 import org.tasks.data.entity.Task
@@ -20,6 +21,7 @@ class TaskEditService @Inject constructor(
     private val subtaskService: TaskSubtaskService,
     private val attachmentService: TaskAttachmentService,
     private val reminderService: TaskReminderService,
+    private val alarmScheduler: TaskAlarmScheduler,
 ) {
     suspend fun createTask(data: TaskEditData) {
         val now = currentTimeMillis()
@@ -53,6 +55,7 @@ class TaskEditService @Inject constructor(
         } else {
             taskSaver.afterSave(task, null)
         }
+        alarmScheduler.scheduleNextAlarm()
     }
 
     suspend fun saveTask(task: Task, data: TaskEditData) {
@@ -80,14 +83,19 @@ class TaskEditService @Inject constructor(
         data.subtasks?.let { subtaskService.syncSubtasks(task, it) }
         data.attachments?.let { attachmentService.syncAttachments(task.id, it) }
         taskSaver.save(updated, task)
+        alarmScheduler.scheduleNextAlarm()
     }
 
     suspend fun setComplete(task: Task, completed: Boolean) {
         taskCompleter.setComplete(task, completed)
+        alarmScheduler.scheduleNextAlarm()
     }
 
-    suspend fun deleteTask(task: Task): List<Task> =
-        taskDeleter.markDeleted(task)
+    suspend fun deleteTask(task: Task): List<Task> {
+        val result = taskDeleter.markDeleted(task)
+        alarmScheduler.scheduleNextAlarm()
+        return result
+    }
 
     suspend fun restoreTasks(tasks: List<Task>) {
         tasks.forEach { deletedTask ->
@@ -100,6 +108,7 @@ class TaskEditService @Inject constructor(
                 current,
             )
         }
+        alarmScheduler.scheduleNextAlarm()
     }
 
     suspend fun updateTasksPriority(tasks: List<Task>, priority: Int) {

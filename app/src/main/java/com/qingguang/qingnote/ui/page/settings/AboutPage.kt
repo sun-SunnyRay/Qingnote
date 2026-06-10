@@ -27,11 +27,6 @@ fun AboutComposeScreen() {
         )
         Text(
             color = SaltTheme.colors.text,
-            text = stringResource(id = R.string.email),
-            modifier = Modifier.padding(top = 8.dp),
-        )
-        Text(
-            color = SaltTheme.colors.text,
             text = stringResource(id = R.string.about_icon),
             modifier = Modifier.padding(top = 24.dp),
             fontSize = 18.sp,

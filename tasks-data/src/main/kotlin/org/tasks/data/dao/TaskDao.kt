@@ -7,7 +7,6 @@ import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
 import androidx.room.Update
 import org.tasks.data.Logger
-import kotlinx.coroutines.flow.Flow
 import org.tasks.data.TaskContainer
 import org.tasks.data.UUIDHelper
 import org.tasks.data.db.Database
@@ -24,25 +23,8 @@ private const val MAX_TIME = 9999999999999
 @Dao
 abstract class TaskDao(private val database: Database) {
 
-    @Query("""
-SELECT COALESCE(MIN(min_value), $MAX_TIME)
-FROM (
-  SELECT
-      MIN(
-        CASE WHEN dueDate > :now THEN dueDate ELSE $MAX_TIME END,
-        CASE WHEN hideUntil > :now THEN hideUntil ELSE $MAX_TIME END
-      ) as min_value
-  FROM tasks
-    WHERE completed = 0 AND deleted = 0
-)
-    """)
-    abstract suspend fun nextRefresh(now: Long = DateTimeUtils2.currentTimeMillis()): Long
-
     @Query("SELECT * FROM tasks WHERE _id = :id LIMIT 1")
     abstract suspend fun fetch(id: Long): Task?
-
-    @Query("SELECT * FROM tasks WHERE _id = :id LIMIT 1")
-    abstract fun watch(id: Long): Flow<Task?>
 
     suspend fun fetch(ids: List<Long>): List<Task> = ids.chunkedMap(this::fetchInternal)
 
@@ -58,64 +40,14 @@ FROM (
     @Query("SELECT COUNT(1) FROM tasks INNER JOIN notification ON tasks._id = notification.task")
     abstract suspend fun hasNotifications(): Int
 
-    @Query("SELECT tasks.* FROM tasks INNER JOIN notification ON tasks._id = notification.task")
-    abstract suspend fun activeNotifications(): List<Task>
-
     @Query("SELECT * FROM tasks WHERE remoteId = :remoteId")
     abstract suspend fun fetch(remoteId: String): Task?
 
-    @Query("SELECT * FROM tasks WHERE completed = 0 AND deleted = 0")
-    abstract suspend fun getActiveTasks(): List<Task>
-
-    @Query("SELECT * FROM tasks WHERE remoteId IN (:remoteIds) "
-            + "AND recurrence IS NOT NULL AND LENGTH(recurrence) > 0")
-    abstract suspend fun getRecurringTasks(remoteIds: List<String>): List<Task>
-
-    @Query("UPDATE tasks SET completed = :completionDate, modified = :updateTime WHERE remoteId IN (:remoteIds)")
-    abstract suspend fun setCompletionDate(remoteIds: List<String>, completionDate: Long, updateTime: Long = DateTimeUtils2.currentTimeMillis())
-
-    @Query("SELECT tasks.* FROM tasks "
-            + "LEFT JOIN caldav_tasks ON tasks._id = caldav_tasks.cd_task "
-            + "LEFT JOIN caldav_lists ON caldav_tasks.cd_calendar = caldav_lists.cdl_uuid "
-            + "WHERE cdl_account = :account "
-            + "AND (tasks.modified > caldav_tasks.cd_last_sync OR caldav_tasks.cd_remote_id = '' OR caldav_tasks.cd_remote_id IS NULL OR caldav_tasks.cd_deleted > 0) "
-            + "ORDER BY CASE WHEN parent = 0 THEN 0 ELSE 1 END, `order` ASC")
-    abstract suspend fun getGoogleTasksToPush(account: String): List<Task>
-
-    @Query("""
-        SELECT tasks.*
-        FROM tasks
-                 INNER JOIN caldav_tasks ON tasks._id = caldav_tasks.cd_task
-        WHERE caldav_tasks.cd_calendar = :calendar
-          AND cd_deleted = 0
-          AND (tasks.modified > caldav_tasks.cd_last_sync OR caldav_tasks.cd_last_sync = 0)
-        ORDER BY created
-    """)
-    abstract suspend fun getCaldavTasksToPush(calendar: String): List<Task>
-
-    // --- SQL clause generators
     @Query("SELECT * FROM tasks")
     abstract suspend fun getAll(): List<Task>
 
     @Query("SELECT * FROM tasks WHERE dueDate BETWEEN :start AND :end AND deleted = 0")
     abstract suspend fun getTasksByDueDate(start: Long, end: Long): List<Task>
-
-    @Query("SELECT _id FROM tasks")
-    abstract suspend fun getAllTaskIds(): List<Long>
-
-    @Query("SELECT calendarUri FROM tasks " + "WHERE calendarUri IS NOT NULL AND calendarUri != ''")
-    abstract suspend fun getAllCalendarEvents(): List<String>
-
-    @Query("UPDATE tasks SET calendarUri = '' " + "WHERE calendarUri IS NOT NULL AND calendarUri != ''")
-    abstract suspend fun clearAllCalendarEvents(): Int
-
-    @Query("SELECT calendarUri FROM tasks "
-            + "WHERE completed > 0 AND calendarUri IS NOT NULL AND calendarUri != ''")
-    abstract suspend fun getCompletedCalendarEvents(): List<String>
-
-    @Query("UPDATE tasks SET calendarUri = '' "
-            + "WHERE completed > 0 AND calendarUri IS NOT NULL AND calendarUri != ''")
-    abstract suspend fun clearCompletedCalendarEvents(): Int
 
     suspend fun fetchTasks(query: String): List<TaskContainer> {
         val start = DateTimeUtils2.currentTimeMillis()
@@ -145,17 +77,8 @@ FROM (
     @Query("UPDATE tasks SET modified = :now WHERE _id in (:ids)")
     internal abstract suspend fun internalTouch(ids: List<Long>, now: Long = DateTimeUtils2.currentTimeMillis())
 
-    @Query("UPDATE tasks SET `order` = :order WHERE _id = :id")
-    abstract suspend fun setOrder(id: Long, order: Long?)
-
-    suspend fun setParent(parent: Long, tasks: List<Long>) =
-            tasks.eachChunk { setParentInternal(parent, it) }
-
-    @Query("UPDATE tasks SET parent = :parent WHERE _id IN (:children) AND _id != :parent")
-    internal abstract suspend fun setParentInternal(parent: Long, children: List<Long>)
-
-    @Query("UPDATE tasks SET lastNotified = :timestamp WHERE _id = :id")
-    abstract suspend fun setLastNotified(id: Long, timestamp: Long)
+    @Query("UPDATE tasks SET collapsed = :collapsed, modified = :now WHERE _id IN (:ids)")
+    abstract suspend fun setCollapsed(ids: List<Long>, collapsed: Boolean, now: Long = DateTimeUtils2.currentTimeMillis())
 
     suspend fun getChildren(id: Long): List<Long> = getChildren(listOf(id))
 
@@ -187,9 +110,6 @@ FROM recursive_tasks
 """)
     abstract suspend fun getParents(parent: Long): List<Long>
 
-    @Query("UPDATE tasks SET collapsed = :collapsed, modified = :now WHERE _id IN (:ids)")
-    abstract suspend fun setCollapsed(ids: List<Long>, collapsed: Boolean, now: Long = DateTimeUtils2.currentTimeMillis())
-
     @Insert
     abstract suspend fun insert(task: Task): Long
 
@@ -218,15 +138,6 @@ FROM recursive_tasks
         task.id = insert
         return task.id
     }
-
-    @Query("""
-SELECT _id
-FROM tasks
-         LEFT JOIN caldav_tasks ON _id = cd_task AND cd_deleted = 0
-WHERE cd_id IS NULL
-  AND parent = 0
-    """)
-    abstract suspend fun getLocalTasks(): List<Long>
 
     /** Generates SQL clauses  */
     object TaskCriteria {

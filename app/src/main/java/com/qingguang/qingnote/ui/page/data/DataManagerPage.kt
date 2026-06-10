@@ -147,7 +147,7 @@ fun DataManagerPage(
     }
 
     val exportMarkDownLauncher =
-        rememberLauncherForActivityResult(ExportMarkDownContract("IdeaMemo")) { uri ->
+        rememberLauncherForActivityResult(ExportMarkDownContract("QingNote")) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
             lunchIo {
                 BackUp.exportMarkDownFile(list = noteState.notes, uri)

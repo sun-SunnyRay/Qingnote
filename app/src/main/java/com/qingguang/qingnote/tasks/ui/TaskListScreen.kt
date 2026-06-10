@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.ripple
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.annotation.StringRes
 import android.Manifest
 import android.app.AlarmManager
 import android.content.Context
@@ -161,6 +162,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -219,6 +221,7 @@ fun TaskListScreen(
     val taskSettings by SettingsPreferences.taskSettings.collectAsState(TaskSettings())
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var selectedTaskIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
     val selectedTasks = remember(uiState.tasks, selectedTaskIds) {
         uiState.tasks.filter { it.id in selectedTaskIds }
@@ -241,7 +244,7 @@ fun TaskListScreen(
             snackbarHostState.currentSnackbarData?.dismiss()
             val result = snackbarHostState.showSnackbar(
                 message = message,
-                actionLabel = "撤销",
+                actionLabel = context.getString(R.string.undo),
                 withDismissAction = true,
             )
             if (result == SnackbarResult.ActionPerformed) {
@@ -294,14 +297,14 @@ fun TaskListScreen(
                         val wasCompleted = task.isCompleted
                         viewModel.setTaskCompleted(task, !wasCompleted)
                         showUndoSnackbar(
-                            message = if (wasCompleted) "已标记为未完成" else "已完成任务",
+                            message = if (wasCompleted) context.getString(R.string.marked_uncompleted) else context.getString(R.string.task_completed_msg),
                             onUndo = { viewModel.setTaskCompleted(task, wasCompleted) },
                         )
                     },
                     onDelete = { task ->
                         viewModel.deleteTask(task) { deletedTasks ->
                             showUndoSnackbar(
-                                message = if (deletedTasks.size > 1) "任务和子任务已删除" else "任务已删除",
+                                message = if (deletedTasks.size > 1) context.getString(R.string.tasks_subtasks_deleted) else context.getString(R.string.task_deleted_msg),
                                 onUndo = { viewModel.restoreTasks(deletedTasks) },
                             )
                         }
@@ -332,7 +335,7 @@ fun TaskListScreen(
                     val originalStates = selectedTasks.map { it to it.isCompleted }
                     viewModel.setTasksCompleted(selectedTasks, completed = true) {
                         showUndoSnackbar(
-                            message = "已完成 ${selectedTasks.size} 个任务",
+                            message = context.getString(R.string.completed_n_tasks, selectedTasks.size),
                             onUndo = { viewModel.restoreTaskCompletionStates(originalStates) },
                         )
                     }
@@ -342,7 +345,7 @@ fun TaskListScreen(
                     val count = selectedTasks.size
                     viewModel.deleteTasks(selectedTasks) { deletedTasks ->
                         showUndoSnackbar(
-                            message = "已删除 $count 个任务",
+                            message = context.getString(R.string.deleted_n_tasks, count),
                             onUndo = { viewModel.restoreTasks(deletedTasks) },
                         )
                     }
@@ -407,7 +410,7 @@ fun TaskListScreen(
             onMove = { destination ->
                 val count = selectedTasks.size
                 viewModel.moveTasksToList(selectedTasks, destination) {
-                    showInfoSnackbar("已移动 $count 个任务")
+                    showInfoSnackbar(context.getString(R.string.moved_n_tasks, count))
                 }
                 selectedTaskIds = emptySet()
                 showBatchMoveDialog = false
@@ -430,7 +433,7 @@ fun TaskListScreen(
             onClearStart = {
                 val count = selectedTasks.size
                 viewModel.updateTasksStartDate(selectedTasks, 0L) {
-                    showInfoSnackbar("已清除 $count 个任务的开始日期")
+                    showInfoSnackbar(context.getString(R.string.cleared_n_start_dates, count))
                 }
                 selectedTaskIds = emptySet()
                 showBatchDateDialog = false
@@ -438,7 +441,7 @@ fun TaskListScreen(
             onClearDue = {
                 val count = selectedTasks.size
                 viewModel.updateTasksDueDate(selectedTasks, 0L) {
-                    showInfoSnackbar("已清除 $count 个任务的截止日期")
+                    showInfoSnackbar(context.getString(R.string.cleared_n_due_dates, count))
                 }
                 selectedTaskIds = emptySet()
                 showBatchDateDialog = false
@@ -458,10 +461,10 @@ fun TaskListScreen(
                 val count = selectedTasks.size
                 when (activePicker) {
                     EditorPicker.START -> viewModel.updateTasksStartDate(selectedTasks, value) {
-                        showInfoSnackbar("已更新 $count 个任务的开始日期")
+                        showInfoSnackbar(context.getString(R.string.updated_n_start_dates, count))
                     }
                     EditorPicker.DUE -> viewModel.updateTasksDueDate(selectedTasks, value) {
-                        showInfoSnackbar("已更新 $count 个任务的截止日期")
+                        showInfoSnackbar(context.getString(R.string.updated_n_due_dates, count))
                     }
                     EditorPicker.REPEAT,
                     EditorPicker.REMINDER -> Unit
@@ -479,7 +482,7 @@ fun TaskListScreen(
             onPriority = { priority ->
                 val count = selectedTasks.size
                 viewModel.updateTasksPriority(selectedTasks, priority) {
-                    showInfoSnackbar("已更新 $count 个任务的优先级")
+                    showInfoSnackbar(context.getString(R.string.updated_n_priorities, count))
                 }
                 selectedTaskIds = emptySet()
                 showBatchPriorityDialog = false
@@ -494,7 +497,7 @@ fun TaskListScreen(
             onConfirm = { tags, replace ->
                 val count = selectedTasks.size
                 viewModel.updateTasksTags(selectedTasks, tags, replace) {
-                    showInfoSnackbar("已更新 $count 个任务的标签")
+                    showInfoSnackbar(context.getString(R.string.updated_n_tags, count))
                 }
                 selectedTaskIds = emptySet()
                 showBatchTagsDialog = false
@@ -527,7 +530,7 @@ private fun TaskErrorView(
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(onClick = onRetry) {
-            Text("重试")
+            Text(stringResource(R.string.retry))
         }
     }
 }
@@ -540,11 +543,11 @@ private fun EmptyTasksView(
     modifier: Modifier = Modifier,
 ) {
     val message = when {
-        query.isNotBlank() -> "没有匹配的任务。"
-        !selectedTag.isNullOrBlank() -> "这个清单下没有任务。"
-        filter == TaskViewFilter.COMPLETED -> "还没有已完成任务。"
-        filter != TaskViewFilter.ALL -> "这个筛选下没有任务。"
-        else -> "这里没有任务哦。"
+        query.isNotBlank() -> stringResource(R.string.no_matching_tasks)
+        !selectedTag.isNullOrBlank() -> stringResource(R.string.no_tasks_in_list)
+        filter == TaskViewFilter.COMPLETED -> stringResource(R.string.no_completed_tasks_yet)
+        filter != TaskViewFilter.ALL -> stringResource(R.string.no_tasks_in_filter)
+        else -> stringResource(R.string.no_tasks_here)
     }
     Column(
         modifier = modifier.padding(32.dp),
@@ -594,18 +597,18 @@ private fun TaskSelectionToolbar(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "已选择 $selectedCount",
+                text = stringResource(R.string.selected_n, selectedCount),
                 modifier = Modifier.weight(1f),
                 fontWeight = FontWeight.Medium,
             )
             TextButton(onClick = onMove) {
-                Text("移动")
+                Text(stringResource(R.string.move))
             }
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,
-                        contentDescription = "批量操作",
+                        contentDescription = stringResource(R.string.batch_actions),
                     )
                 }
                 DropdownMenu(
@@ -613,21 +616,21 @@ private fun TaskSelectionToolbar(
                     onDismissRequest = { menuExpanded = false },
                 ) {
                     DropdownMenuItem(
-                        text = { Text("设置日期") },
+                        text = { Text(stringResource(R.string.set_date)) },
                         onClick = {
                             menuExpanded = false
                             onDate()
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("设置优先级") },
+                        text = { Text(stringResource(R.string.set_priority)) },
                         onClick = {
                             menuExpanded = false
                             onPriority()
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text("设置标签") },
+                        text = { Text(stringResource(R.string.set_tags)) },
                         onClick = {
                             menuExpanded = false
                             onTags()
@@ -636,13 +639,13 @@ private fun TaskSelectionToolbar(
                 }
             }
             TextButton(onClick = onComplete) {
-                Text("完成")
+                Text(stringResource(R.string.complete))
             }
             TextButton(onClick = onDelete) {
-                Text("删除")
+                Text(stringResource(R.string.delete))
             }
             TextButton(onClick = onCancel) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         }
     }
@@ -661,9 +664,9 @@ private fun TaskBatchMoveDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("移动到清单") },
+        title = { Text(stringResource(R.string.move_to_list)) },
         text = {
             LazyColumn(
                 modifier = Modifier.heightIn(max = 420.dp),
@@ -671,7 +674,7 @@ private fun TaskBatchMoveDialog(
             ) {
                 item {
                     Text(
-                        text = "已选择 $selectedCount 个任务",
+                        text = stringResource(R.string.selected_n_tasks, selectedCount),
                         color = SaltTheme.colors.subText,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(bottom = 8.dp),
@@ -680,7 +683,7 @@ private fun TaskBatchMoveDialog(
                 if (currentName != null) {
                     item {
                         BatchMoveListRow(
-                            name = "移出“$currentName”",
+                            name = stringResource(R.string.remove_from_list, currentName),
                             selected = false,
                             count = null,
                             onClick = { onMove(null) },
@@ -689,7 +692,7 @@ private fun TaskBatchMoveDialog(
                 }
                 item {
                     BatchMoveListRow(
-                        name = "我的任务",
+                        name = stringResource(R.string.filter_my_tasks),
                         selected = currentName == null,
                         count = null,
                         onClick = { onMove(null) },
@@ -711,7 +714,7 @@ private fun TaskBatchMoveDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -728,26 +731,26 @@ private fun BatchDateActionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("批量日期") },
+        title = { Text(stringResource(R.string.batch_date)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = "已选择 $selectedCount 个任务",
+                    text = stringResource(R.string.selected_n_tasks, selectedCount),
                     color = SaltTheme.colors.subText,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
-                DialogChoice("设置开始日期", onSetStart)
-                DialogChoice("设置截止日期", onSetDue)
-                DialogChoice("清除开始日期", onClearStart)
-                DialogChoice("清除截止日期", onClearDue)
+                DialogChoice(stringResource(R.string.set_start_date), onSetStart)
+                DialogChoice(stringResource(R.string.set_due_date), onSetDue)
+                DialogChoice(stringResource(R.string.clear_start_date), onClearStart)
+                DialogChoice(stringResource(R.string.clear_due_date), onClearDue)
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -761,26 +764,26 @@ private fun BatchPriorityDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("批量优先级") },
+        title = { Text(stringResource(R.string.batch_priority)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    text = "已选择 $selectedCount 个任务",
+                    text = stringResource(R.string.selected_n_tasks, selectedCount),
                     color = SaltTheme.colors.subText,
                     fontSize = 13.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
-                DialogChoice("无优先级") { onPriority(Task.Priority.NONE) }
-                DialogChoice("低优先级") { onPriority(Task.Priority.LOW) }
-                DialogChoice("中优先级") { onPriority(Task.Priority.MEDIUM) }
-                DialogChoice("高优先级") { onPriority(Task.Priority.HIGH) }
+                DialogChoice(stringResource(R.string.no_priority)) { onPriority(Task.Priority.NONE) }
+                DialogChoice(stringResource(R.string.low_priority)) { onPriority(Task.Priority.LOW) }
+                DialogChoice(stringResource(R.string.medium_priority)) { onPriority(Task.Priority.MEDIUM) }
+                DialogChoice(stringResource(R.string.high_priority)) { onPriority(Task.Priority.HIGH) }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -798,13 +801,13 @@ private fun BatchTagsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("批量标签") },
+        title = { Text(stringResource(R.string.batch_tags)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = "已选择 $selectedCount 个任务",
+                    text = stringResource(R.string.selected_n_tasks, selectedCount),
                     color = SaltTheme.colors.subText,
                     fontSize = 13.sp,
                 )
@@ -813,16 +816,16 @@ private fun BatchTagsDialog(
                     onValueChange = { text = it },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    placeholder = { Text("标签，用空格或逗号分隔") },
+                    placeholder = { Text(stringResource(R.string.tags_hint)) },
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     DateTimeChip(
-                        text = "追加",
+                        text = stringResource(R.string.append),
                         selected = !replace,
                         onClick = { replace = false },
                     )
                     DateTimeChip(
-                        text = "替换",
+                        text = stringResource(R.string.replace),
                         selected = replace,
                         onClick = { replace = true },
                     )
@@ -834,12 +837,12 @@ private fun BatchTagsDialog(
                 enabled = tags.isNotEmpty(),
                 onClick = { onConfirm(tags, replace) },
             ) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -1005,7 +1008,7 @@ private fun TaskEditorDialog(
         if (granted) {
             saveRetryToken++
         } else {
-            Toast.makeText(context, "未授予通知权限，无法保存提醒", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_notification_perm), Toast.LENGTH_SHORT).show()
         }
     }
     val attachmentPicker = rememberLauncherForActivityResult(
@@ -1029,7 +1032,7 @@ private fun TaskEditorDialog(
                 )
             }.isSuccess
             if (!permissionPersisted) {
-                Toast.makeText(context, "附件导入失败，且权限无法持久化", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.toast_attach_import_failed), Toast.LENGTH_SHORT).show()
             }
             attachments = attachments + TaskAttachmentDraft(
                 name = context.displayName(uri),
@@ -1044,7 +1047,7 @@ private fun TaskEditorDialog(
         if (grants.values.all { it }) {
             saveRetryToken++
         } else {
-            Toast.makeText(context, "未授予日历权限，任务不会写入日历", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_calendar_perm), Toast.LENGTH_SHORT).show()
         }
     }
     val exactAlarmSettingsLauncher = rememberLauncherForActivityResult(
@@ -1113,13 +1116,13 @@ private fun TaskEditorDialog(
 
     fun save() {
         if (title.isBlank()) {
-            Toast.makeText(context, "请输入任务名称", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_enter_task_name), Toast.LENGTH_SHORT).show()
             titleFocusRequester.requestFocus()
             keyboardController?.show()
             return
         }
         if (startDate > 0 && dueDate > 0 && startDate > dueDate) {
-            Toast.makeText(context, "开始日期不能晚于截止日期", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_start_after_due), Toast.LENGTH_SHORT).show()
             return
         }
         if (!requestReminderPermissions()) return
@@ -1182,7 +1185,7 @@ private fun TaskEditorDialog(
                     IconButton(onClick = ::save) {
                         Icon(
                             imageVector = Icons.Filled.Save,
-                            contentDescription = "保存任务",
+                            contentDescription = stringResource(R.string.save_task),
                             tint = SaltTheme.colors.text,
                         )
                     }
@@ -1198,20 +1201,23 @@ private fun TaskEditorDialog(
                 )
                 TaskEditorRow(
                     icon = Icons.Outlined.EventAvailable,
-                    primary = if (startDate > 0) formatEditorTimestamp(startDate, settings) else "无开始日期",
-                    secondary = "开始日期",
+                    primary = if (startDate > 0) formatEditorTimestamp(startDate, settings) else stringResource(R.string.no_start_date_cap),
+                    secondary = stringResource(R.string.start_date),
+                    isPlaceholder = startDate <= 0,
                     onClick = { picker = EditorPicker.START },
                 )
                 TaskEditorRow(
                     icon = Icons.Outlined.AccessTime,
-                    primary = if (dueDate > 0) formatEditorTimestamp(dueDate, settings) else "无截止日期",
-                    secondary = "截止日期",
+                    primary = if (dueDate > 0) formatEditorTimestamp(dueDate, settings) else stringResource(R.string.no_due_date_cap),
+                    secondary = stringResource(R.string.due_date),
+                    isPlaceholder = dueDate <= 0,
                     onClick = { picker = EditorPicker.DUE },
                 )
                 TaskEditorRow(
                     icon = Icons.Outlined.Repeat,
-                    primary = recurrenceLabel(recurrence),
-                    secondary = "重复",
+                    primary = recurrenceLabel(context, recurrence),
+                    secondary = stringResource(R.string.repeat),
+                    isPlaceholder = recurrence == null,
                     onClick = { editorSheet = EditorSheetTarget.REPEAT },
                 )
                 PriorityRow(
@@ -1242,20 +1248,21 @@ private fun TaskEditorDialog(
                 )
                 TaskEditorRow(
                     icon = Icons.AutoMirrored.Outlined.Notes,
-                    primary = "描述",
-                    secondary = notes.ifBlank { "无描述" },
+                    primary = stringResource(R.string.description),
+                    secondary = notes.ifBlank { stringResource(R.string.no_description) },
                     onClick = { editorSheet = EditorSheetTarget.NOTES },
                 )
                 TaskEditorRow(
                     icon = Icons.Outlined.AttachFile,
-                    primary = attachmentSummary(attachments),
-                    secondary = "附件",
+                    primary = attachmentSummary(context, attachments),
+                    secondary = stringResource(R.string.attachments),
+                    isPlaceholder = attachments.isEmpty(),
                     onClick = { editorSheet = EditorSheetTarget.ATTACHMENT },
                 )
                 TaskEditorRow(
                     icon = Icons.Outlined.CalendarMonth,
-                    primary = if (addToCalendar) "添加到日历" else "不添加到日历",
-                    secondary = "日历",
+                    primary = if (addToCalendar) stringResource(R.string.add_to_calendar) else stringResource(R.string.not_add_to_calendar),
+                    secondary = stringResource(R.string.calendar),
                     onClick = { editorSheet = EditorSheetTarget.CALENDAR },
                 )
                 TaskInfoRow(task = task, settings = settings)
@@ -1413,8 +1420,8 @@ private fun TaskEditorDialog(
     textEditor?.let { target ->
         TextValueDialog(
             title = when (target) {
-                TextEditorTarget.TAGS -> "添加标签"
-                TextEditorTarget.NOTES -> "描述"
+                TextEditorTarget.TAGS -> stringResource(R.string.add_tags)
+                TextEditorTarget.NOTES -> stringResource(R.string.description)
             },
             value = when (target) {
                 TextEditorTarget.TAGS -> tagText
@@ -1451,28 +1458,28 @@ private fun TaskEditorDialog(
     if (showUnsavedChangesDialog) {
         AlertDialog(
             onDismissRequest = { showUnsavedChangesDialog = false },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("放弃更改？") },
-            text = { Text("当前任务有未保存的更改。") },
+            title = { Text(stringResource(R.string.discard_changes_title)) },
+            text = { Text(stringResource(R.string.discard_changes_msg)) },
             confirmButton = {
                 TextButton(onClick = {
                     showUnsavedChangesDialog = false
                     onDismiss()
                 }) {
-                    Text("放弃")
+                    Text(stringResource(R.string.discard))
                 }
             },
             dismissButton = {
                 Row {
                     TextButton(onClick = { showUnsavedChangesDialog = false }) {
-                        Text("继续编辑")
+                        Text(stringResource(R.string.continue_editing))
                     }
                     TextButton(onClick = {
                         showUnsavedChangesDialog = false
                         save()
                     }) {
-                        Text("保存")
+                        Text(stringResource(R.string.save))
                     }
                 }
             },
@@ -1482,21 +1489,21 @@ private fun TaskEditorDialog(
     if (showExactAlarmDialog) {
         AlertDialog(
             onDismissRequest = { showExactAlarmDialog = false },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("需要提醒权限") },
-            text = { Text("系统需要允许精确闹钟后，任务提醒才能准时触发。") },
+            title = { Text(stringResource(R.string.need_reminder_perm)) },
+            text = { Text(stringResource(R.string.exact_alarm_msg)) },
             confirmButton = {
                 TextButton(onClick = {
                     showExactAlarmDialog = false
                     exactAlarmSettingsLauncher.launch(context.exactAlarmSettingsIntent())
                 }) {
-                    Text("去设置")
+                    Text(stringResource(R.string.go_to_settings))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showExactAlarmDialog = false }) {
-                    Text("稍后")
+                    Text(stringResource(R.string.restart_later))
                 }
             },
         )
@@ -1537,6 +1544,7 @@ private fun TaskEditorActionSheet(
     onClearAttachments: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val context = LocalContext.current
     val today = remember { LocalDate.now() }
     val dueDateTime = remember(dueDate) {
         dueDate.takeIf { it > 0 }
@@ -1547,7 +1555,7 @@ private fun TaskEditorActionSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier
@@ -1558,62 +1566,62 @@ private fun TaskEditorActionSheet(
             when (target) {
                 EditorSheetTarget.DUE_DATE -> {
                     TaskEditorSheetHeader(
-                        title = "截止日期",
-                        subtitle = if (dueDate > 0) formatEditorTimestamp(dueDate, settings) else "无截止日期",
+                        title = stringResource(R.string.due_date),
+                        subtitle = if (dueDate > 0) formatEditorTimestamp(dueDate, settings) else stringResource(R.string.no_due_date_cap),
                     )
-                    TaskEditorSheetRow(Icons.Outlined.CalendarToday, "今天", "今晚 23:59") {
+                    TaskEditorSheetRow(Icons.Outlined.CalendarToday, stringResource(R.string.today), stringResource(R.string.tomorrow_2359)) {
                         onDueDateSelected(today.quickDateMillis(EditorPicker.DUE))
                     }
-                    TaskEditorSheetRow(Icons.Outlined.CalendarToday, "明天", "明晚 23:59") {
+                    TaskEditorSheetRow(Icons.Outlined.CalendarToday, stringResource(R.string.tomorrow), stringResource(R.string.tomorrow_2359)) {
                         onDueDateSelected(today.plusDays(1).quickDateMillis(EditorPicker.DUE))
                     }
-                    TaskEditorSheetRow(Icons.Outlined.CalendarToday, "下周", "7 天后 23:59") {
+                    TaskEditorSheetRow(Icons.Outlined.CalendarToday, stringResource(R.string.next_week), stringResource(R.string.next_week_2359)) {
                         onDueDateSelected(today.plusWeeks(1).quickDateMillis(EditorPicker.DUE))
                     }
-                    TaskEditorSheetRow(Icons.Outlined.AccessTime, "选择日期和时间", "打开完整日期/时间面板") {
+                    TaskEditorSheetRow(Icons.Outlined.AccessTime, stringResource(R.string.select_date_time), stringResource(R.string.open_full_datetime)) {
                         onOpenDatePicker(EditorPicker.DUE)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.CheckCircle, "无截止日期", null, selected = dueDate == 0L) {
+                    TaskEditorSheetRow(Icons.Outlined.CheckCircle, stringResource(R.string.no_due_date_cap), null, selected = dueDate == 0L) {
                         onDueDateSelected(0L)
                     }
                 }
 
                 EditorSheetTarget.START_DATE -> {
                     TaskEditorSheetHeader(
-                        title = "开始日期",
-                        subtitle = if (startDate > 0) formatEditorTimestamp(startDate, settings) else "无开始日期",
+                        title = stringResource(R.string.start_date),
+                        subtitle = if (startDate > 0) formatEditorTimestamp(startDate, settings) else stringResource(R.string.no_start_date_cap),
                     )
-                    TaskEditorSheetRow(Icons.Outlined.EventAvailable, "今天", "上午 9:00") {
+                    TaskEditorSheetRow(Icons.Outlined.EventAvailable, stringResource(R.string.today), stringResource(R.string.am_900)) {
                         onStartDateSelected(today.quickDateMillis(EditorPicker.START))
                     }
-                    TaskEditorSheetRow(Icons.Outlined.EventAvailable, "明天", "上午 9:00") {
+                    TaskEditorSheetRow(Icons.Outlined.EventAvailable, stringResource(R.string.tomorrow), stringResource(R.string.am_900)) {
                         onStartDateSelected(today.plusDays(1).quickDateMillis(EditorPicker.START))
                     }
                     if (dueDateTime != null) {
-                        TaskEditorSheetRow(Icons.Outlined.AccessTime, "按截止日期", formatEditorTimestamp(dueDate, settings)) {
+                        TaskEditorSheetRow(Icons.Outlined.AccessTime, stringResource(R.string.by_due_date), formatEditorTimestamp(dueDate, settings)) {
                             onStartDateSelected(dueDate)
                         }
-                        TaskEditorSheetRow(Icons.Outlined.AccessTime, "截止前一天", null) {
+                        TaskEditorSheetRow(Icons.Outlined.AccessTime, stringResource(R.string.day_before_due), null) {
                             onStartDateSelected(dueDateTime.minusDays(1).toMillis())
                         }
-                        TaskEditorSheetRow(Icons.Outlined.AccessTime, "截止前一周", null) {
+                        TaskEditorSheetRow(Icons.Outlined.AccessTime, stringResource(R.string.week_before_due), null) {
                             onStartDateSelected(dueDateTime.minusWeeks(1).toMillis())
                         }
                     }
-                    TaskEditorSheetRow(Icons.Outlined.AccessTime, "选择日期和时间", "打开完整日期/时间面板") {
+                    TaskEditorSheetRow(Icons.Outlined.AccessTime, stringResource(R.string.select_date_time), stringResource(R.string.open_full_datetime)) {
                         onOpenDatePicker(EditorPicker.START)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.CheckCircle, "无开始日期", null, selected = startDate == 0L) {
+                    TaskEditorSheetRow(Icons.Outlined.CheckCircle, stringResource(R.string.no_start_date_cap), null, selected = startDate == 0L) {
                         onStartDateSelected(0L)
                     }
                 }
 
                 EditorSheetTarget.PRIORITY -> {
-                    TaskEditorSheetHeader(title = "优先级", subtitle = priorityLabel(priority))
+                    TaskEditorSheetHeader(title = stringResource(R.string.priority), subtitle = stringResource(priorityLabel(priority)))
                     priorityOptions().forEach { option ->
                         TaskEditorSheetRow(
                             icon = Icons.Outlined.Flag,
-                            title = option.label,
+                            title = stringResource(option.label),
                             subtitle = option.subtitle,
                             selected = priority == option.value,
                             accent = option.color,
@@ -1625,27 +1633,27 @@ private fun TaskEditorActionSheet(
 
                 EditorSheetTarget.CALENDAR -> {
                     TaskEditorSheetHeader(
-                        title = "日历",
-                        subtitle = if (addToCalendar) "添加到日历" else "不添加到日历",
+                        title = stringResource(R.string.calendar),
+                        subtitle = if (addToCalendar) stringResource(R.string.add_to_calendar) else stringResource(R.string.not_add_to_calendar),
                     )
-                    TaskEditorSheetRow(Icons.Outlined.CalendarMonth, "添加到日历", "保存时写入系统日历", selected = addToCalendar) {
+                    TaskEditorSheetRow(Icons.Outlined.CalendarMonth, stringResource(R.string.add_to_calendar), stringResource(R.string.save_calendar_on_save), selected = addToCalendar) {
                         onCalendarSelected(true)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.CalendarMonth, "不添加到日历", null, selected = !addToCalendar) {
+                    TaskEditorSheetRow(Icons.Outlined.CalendarMonth, stringResource(R.string.not_add_to_calendar), null, selected = !addToCalendar) {
                         onCalendarSelected(false)
                     }
                 }
 
                 EditorSheetTarget.NOTES -> {
                     TaskEditorSheetHeader(
-                        title = "描述",
-                        subtitle = notes.ifBlank { "无描述" },
+                        title = stringResource(R.string.description),
+                        subtitle = notes.ifBlank { stringResource(R.string.no_description) },
                     )
-                    TaskEditorSheetRow(Icons.AutoMirrored.Outlined.Notes, "编辑描述", "进入文本编辑") {
+                    TaskEditorSheetRow(Icons.AutoMirrored.Outlined.Notes, stringResource(R.string.edit_description), stringResource(R.string.description)) {
                         onOpenTextEditor(TextEditorTarget.NOTES)
                     }
                     if (notes.isNotBlank()) {
-                        TaskEditorSheetRow(Icons.Filled.Delete, "清空描述") {
+                        TaskEditorSheetRow(Icons.Filled.Delete, stringResource(R.string.clear_description)) {
                             onClearNotes()
                         }
                     }
@@ -1653,82 +1661,82 @@ private fun TaskEditorActionSheet(
 
                 EditorSheetTarget.TAGS -> {
                     TaskEditorSheetHeader(
-                        title = "标签",
-                        subtitle = tagText.ifBlank { "未添加标签" },
+                        title = stringResource(R.string.icon_label),
+                        subtitle = tagText.ifBlank { stringResource(R.string.no_tags_added) },
                     )
-                    TaskEditorSheetRow(Icons.AutoMirrored.Outlined.Label, "编辑标签", "多个标签可用空格、逗号或 # 分隔") {
+                    TaskEditorSheetRow(Icons.AutoMirrored.Outlined.Label, stringResource(R.string.edit_tags), stringResource(R.string.tags_hint_detail)) {
                         onOpenTextEditor(TextEditorTarget.TAGS)
                     }
                     if (tagText.isNotBlank()) {
-                        TaskEditorSheetRow(Icons.Filled.Delete, "清空标签") {
+                        TaskEditorSheetRow(Icons.Filled.Delete, stringResource(R.string.clear_tags)) {
                             onClearTags()
                         }
                     }
                 }
 
                 EditorSheetTarget.REPEAT -> {
-                    TaskEditorSheetHeader(title = "重复", subtitle = recurrenceLabel(recurrence))
-                    TaskEditorSheetRow(Icons.Outlined.CheckCircle, "不重复", null, selected = recurrence == null) {
+                    TaskEditorSheetHeader(title = stringResource(R.string.repeat), subtitle = recurrenceLabel(context, recurrence))
+                    TaskEditorSheetRow(Icons.Outlined.CheckCircle, stringResource(R.string.no_repeat), null, selected = recurrence == null) {
                         onSetRepeat(null, repeatFrom)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.Repeat, "每天", null, selected = recurrence == "RRULE:FREQ=DAILY") {
+                    TaskEditorSheetRow(Icons.Outlined.Repeat, stringResource(R.string.daily), null, selected = recurrence == "RRULE:FREQ=DAILY") {
                         onSetRepeat("RRULE:FREQ=DAILY", Task.RepeatFrom.DUE_DATE)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.Repeat, "每周", null, selected = recurrence == "RRULE:FREQ=WEEKLY") {
+                    TaskEditorSheetRow(Icons.Outlined.Repeat, stringResource(R.string.weekly), null, selected = recurrence == "RRULE:FREQ=WEEKLY") {
                         onSetRepeat("RRULE:FREQ=WEEKLY", Task.RepeatFrom.DUE_DATE)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.Repeat, "每月", null, selected = recurrence == "RRULE:FREQ=MONTHLY") {
+                    TaskEditorSheetRow(Icons.Outlined.Repeat, stringResource(R.string.monthly), null, selected = recurrence == "RRULE:FREQ=MONTHLY") {
                         onSetRepeat("RRULE:FREQ=MONTHLY", Task.RepeatFrom.DUE_DATE)
                     }
-                    TaskEditorSheetRow(Icons.Outlined.Repeat, "自定义重复周期", "频率、间隔、周几、结束条件") {
+                    TaskEditorSheetRow(Icons.Outlined.Repeat, stringResource(R.string.custom_repeat), stringResource(R.string.freq_interval_dow_end)) {
                         onOpenRepeatEditor()
                     }
                 }
 
                 EditorSheetTarget.REMINDER -> {
                     TaskEditorSheetHeader(
-                        title = "提醒",
-                        subtitle = reminderSummary(reminders, startDate, dueDate, settings),
+                        title = stringResource(R.string.reminders),
+                        subtitle = reminderSummary(context, reminders, startDate, dueDate, settings),
                     )
-                    TaskEditorSheetRow(Icons.Outlined.Notifications, "管理提醒", "查看、编辑、自定义、随机提醒") {
+                    TaskEditorSheetRow(Icons.Outlined.Notifications, stringResource(R.string.manage_reminders), stringResource(R.string.view_edit_custom_random)) {
                         onOpenReminders()
                     }
                     if (startDate > 0) {
-                        TaskEditorSheetRow(Icons.Outlined.Notifications, "开始时", formatEditorTimestamp(startDate, settings)) {
+                        TaskEditorSheetRow(Icons.Outlined.Notifications, stringResource(R.string.at_start), formatEditorTimestamp(startDate, settings)) {
                             onAddReminder(TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START))
                         }
-                        TaskEditorSheetRow(Icons.Outlined.Notifications, "开始前 10 分钟") {
+                        TaskEditorSheetRow(Icons.Outlined.Notifications, stringResource(R.string.before_start_10)) {
                             onAddReminder(TaskReminderDraft(time = -TEN_MINUTES_MILLIS, type = Alarm.TYPE_REL_START))
                         }
                     }
                     if (dueDate > 0) {
-                        TaskEditorSheetRow(Icons.Outlined.Notifications, "到期时", formatEditorTimestamp(dueDate, settings)) {
+                        TaskEditorSheetRow(Icons.Outlined.Notifications, stringResource(R.string.at_due), formatEditorTimestamp(dueDate, settings)) {
                             onAddReminder(TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END))
                         }
-                        TaskEditorSheetRow(Icons.Outlined.Notifications, "提前 10 分钟") {
+                        TaskEditorSheetRow(Icons.Outlined.Notifications, stringResource(R.string.before_due_10)) {
                             onAddReminder(TaskReminderDraft(time = -TEN_MINUTES_MILLIS, type = Alarm.TYPE_REL_END))
                         }
                     }
-                    TaskEditorSheetRow(Icons.Outlined.AccessTime, "选择具体时间", "打开日期/时间面板") {
+                    TaskEditorSheetRow(Icons.Outlined.AccessTime, stringResource(R.string.select_specific_time), stringResource(R.string.open_datetime_panel)) {
                         onOpenDatePicker(EditorPicker.REMINDER)
                     }
                     if (reminders.isNotEmpty()) {
-                        TaskEditorSheetRow(Icons.Filled.Delete, "清空提醒") {
+                        TaskEditorSheetRow(Icons.Filled.Delete, stringResource(R.string.clear_reminders)) {
                             onClearReminders()
                         }
                     }
                 }
 
                 EditorSheetTarget.ATTACHMENT -> {
-                    TaskEditorSheetHeader(title = "附件", subtitle = attachmentSummary(attachments))
-                    TaskEditorSheetRow(Icons.Outlined.AttachFile, "管理附件", "打开、删除已添加附件") {
+                    TaskEditorSheetHeader(title = stringResource(R.string.attachments), subtitle = attachmentSummary(context, attachments))
+                    TaskEditorSheetRow(Icons.Outlined.AttachFile, stringResource(R.string.manage_attachments), stringResource(R.string.open_delete_added)) {
                         onOpenAttachments()
                     }
-                    TaskEditorSheetRow(Icons.Outlined.AttachFile, "添加附件") {
+                    TaskEditorSheetRow(Icons.Outlined.AttachFile, stringResource(R.string.add_attachment)) {
                         onAddAttachment()
                     }
                     if (attachments.isNotEmpty()) {
-                        TaskEditorSheetRow(Icons.Filled.Delete, "清空附件") {
+                        TaskEditorSheetRow(Icons.Filled.Delete, stringResource(R.string.clear_attachments)) {
                             onClearAttachments()
                         }
                     }
@@ -1822,21 +1830,22 @@ private fun TaskEditorSheetRow(
 
 private data class PriorityOption(
     val value: Int,
-    val label: String,
+    @StringRes val label: Int,
     val subtitle: String?,
     val color: Color,
 )
 
 private fun priorityOptions(): List<PriorityOption> =
     listOf(
-        PriorityOption(Task.Priority.NONE, "无优先级", null, Color(0xFF8E8E8E)),
-        PriorityOption(Task.Priority.LOW, "低优先级", null, Color(0xFF4F9DD6)),
-        PriorityOption(Task.Priority.MEDIUM, "中优先级", null, Color(0xFFE5C94D)),
-        PriorityOption(Task.Priority.HIGH, "高优先级", null, Color(0xFFD56060)),
+        PriorityOption(Task.Priority.NONE, R.string.no_priority, null, Color(0xFF8E8E8E)),
+        PriorityOption(Task.Priority.LOW, R.string.low_priority, null, Color(0xFF4F9DD6)),
+        PriorityOption(Task.Priority.MEDIUM, R.string.medium_priority, null, Color(0xFFE5C94D)),
+        PriorityOption(Task.Priority.HIGH, R.string.high_priority, null, Color(0xFFD56060)),
     )
 
-private fun priorityLabel(priority: Int): String =
-    priorityOptions().firstOrNull { it.value == priority }?.label ?: "无优先级"
+@StringRes
+private fun priorityLabel(priority: Int): Int =
+    priorityOptions().firstOrNull { it.value == priority }?.label ?: R.string.no_priority
 
 @Composable
 private fun TaskInfoRow(task: Task?, settings: TaskSettings) {
@@ -1859,12 +1868,12 @@ private fun TaskInfoRow(task: Task?, settings: TaskSettings) {
         Spacer(modifier = Modifier.width(32.dp))
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = "已创建的 ${formatInfoTimestamp(created, settings)}",
+                text = stringResource(R.string.info_created, formatInfoTimestamp(created, settings)),
                 color = SaltTheme.colors.text,
                 fontSize = 14.sp,
             )
             Text(
-                text = "已修改的 ${formatInfoTimestamp(modified, settings)}",
+                text = stringResource(R.string.info_modified, formatInfoTimestamp(modified, settings)),
                 color = SaltTheme.colors.text,
                 fontSize = 14.sp,
             )
@@ -1910,7 +1919,7 @@ private fun TaskTitleRow(
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (title.isBlank()) {
                         Text(
-                            text = "任务名称",
+                            text = stringResource(R.string.task_name),
                             style = MaterialTheme.typography.bodyLarge,
                             color = SaltTheme.colors.text.copy(alpha = 0.38f),
                         )
@@ -1936,6 +1945,7 @@ private fun TaskEditorRow(
     primary: String,
     modifier: Modifier = Modifier,
     secondary: String? = null,
+    isPlaceholder: Boolean = false,
     trailing: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
@@ -1957,7 +1967,7 @@ private fun TaskEditorRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = primary,
-                color = SaltTheme.colors.text.copy(alpha = if (primary.startsWith("添加") || primary.startsWith("无") || primary == "描述") 0.48f else 1f),
+                color = SaltTheme.colors.text.copy(alpha = if (isPlaceholder) 0.48f else 1f),
                 fontSize = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -2000,7 +2010,7 @@ private fun PriorityRow(
         )
         Spacer(modifier = Modifier.width(32.dp))
         Text(
-            text = "优先级",
+            text = stringResource(R.string.priority),
             color = SaltTheme.colors.text,
             fontSize = 16.sp,
         )
@@ -2095,9 +2105,9 @@ private fun DateTimeEditorDialog(
     var showTimePicker by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val title = when (picker) {
-        EditorPicker.START -> "开始日期"
-        EditorPicker.DUE -> "截止日期"
-        EditorPicker.REMINDER -> "提醒"
+        EditorPicker.START -> stringResource(R.string.start_date)
+        EditorPicker.DUE -> stringResource(R.string.due_date)
+        EditorPicker.REMINDER -> stringResource(R.string.reminders)
         EditorPicker.REPEAT -> ""
     }
     val selectedDateFromCalendar = datePickerState.selectedDateMillis
@@ -2134,7 +2144,7 @@ private fun DateTimeEditorDialog(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
             modifier = Modifier
@@ -2149,14 +2159,14 @@ private fun DateTimeEditorDialog(
                             if (dueDate > 0) {
                                 DateTimeShortcutButton(
                                     icon = Icons.Outlined.Today,
-                                    text = "截止日期",
+                                    text = stringResource(R.string.due_date),
                                     selected = selectedDay == START_DUE_DATE,
                                 ) {
                                     selectedDay = START_DUE_DATE
                                 }
                                 DateTimeShortcutButton(
                                     icon = Icons.Outlined.Schedule,
-                                    text = "截止时间",
+                                    text = stringResource(R.string.due),
                                     selected = selectedDay == START_DUE_TIME,
                                 ) {
                                     selectedDay = START_DUE_TIME
@@ -2164,32 +2174,32 @@ private fun DateTimeEditorDialog(
                                 }
                                 DateTimeShortcutButton(
                                     icon = Icons.Outlined.WbSunny,
-                                    text = "截止日期前一天",
+                                    text = stringResource(R.string.day_before_due),
                                     selected = selectedDay == START_DAY_BEFORE_DUE,
                                 ) {
                                     selectedDay = START_DAY_BEFORE_DUE
                                 }
                                 DateTimeShortcutButton(
                                     icon = Icons.Outlined.CalendarViewWeek,
-                                    text = "截止日期前一周",
+                                    text = stringResource(R.string.week_before_due),
                                     selected = selectedDay == START_WEEK_BEFORE_DUE,
                                 ) {
                                     selectedDay = START_WEEK_BEFORE_DUE
                                 }
                             } else {
-                                DateTimeShortcutButton(Icons.Outlined.Today, "今天", selectedDay == today.toStartOfDayMillis()) {
+                                DateTimeShortcutButton(Icons.Outlined.Today, stringResource(R.string.today), selectedDay == today.toStartOfDayMillis()) {
                                     selectCalendarDate(today)
                                 }
-                                DateTimeShortcutButton(Icons.Outlined.WbSunny, "明天", selectedDay == today.plusDays(1).toStartOfDayMillis()) {
+                                DateTimeShortcutButton(Icons.Outlined.WbSunny, stringResource(R.string.tomorrow), selectedDay == today.plusDays(1).toStartOfDayMillis()) {
                                     selectCalendarDate(today.plusDays(1))
                                 }
-                                DateTimeShortcutButton(Icons.Outlined.CalendarViewWeek, "下周", selectedDay == today.plusWeeks(1).toStartOfDayMillis()) {
+                                DateTimeShortcutButton(Icons.Outlined.CalendarViewWeek, stringResource(R.string.next_week), selectedDay == today.plusWeeks(1).toStartOfDayMillis()) {
                                     selectCalendarDate(today.plusWeeks(1))
                                 }
                             }
                             DateTimeShortcutButton(
                                 icon = Icons.Outlined.Block,
-                                text = "无日期",
+                                text = stringResource(R.string.date_none),
                                 selected = selectedDay == EDITOR_NO_DAY,
                             ) {
                                 selectedDay = EDITOR_NO_DAY
@@ -2198,18 +2208,18 @@ private fun DateTimeEditorDialog(
                         }
 
                         EditorPicker.DUE, EditorPicker.REMINDER -> {
-                            DateTimeShortcutButton(Icons.Outlined.Today, "今天", selectedDay == today.toStartOfDayMillis()) {
+                            DateTimeShortcutButton(Icons.Outlined.Today, stringResource(R.string.today), selectedDay == today.toStartOfDayMillis()) {
                                 selectCalendarDate(today)
                             }
-                            DateTimeShortcutButton(Icons.Outlined.WbSunny, "明天", selectedDay == today.plusDays(1).toStartOfDayMillis()) {
+                            DateTimeShortcutButton(Icons.Outlined.WbSunny, stringResource(R.string.tomorrow), selectedDay == today.plusDays(1).toStartOfDayMillis()) {
                                 selectCalendarDate(today.plusDays(1))
                             }
-                            DateTimeShortcutButton(Icons.Outlined.CalendarViewWeek, "下周", selectedDay == today.plusWeeks(1).toStartOfDayMillis()) {
+                            DateTimeShortcutButton(Icons.Outlined.CalendarViewWeek, stringResource(R.string.next_week), selectedDay == today.plusWeeks(1).toStartOfDayMillis()) {
                                 selectCalendarDate(today.plusWeeks(1))
                             }
                             DateTimeShortcutButton(
                                 icon = Icons.Outlined.Block,
-                                text = if (picker == EditorPicker.REMINDER) "无提醒" else "无日期",
+                                text = if (picker == EditorPicker.REMINDER) stringResource(R.string.reminder_none) else stringResource(R.string.date_none),
                                 selected = selectedDay == EDITOR_NO_DAY,
                             ) {
                                 selectedDay = EDITOR_NO_DAY
@@ -2223,39 +2233,39 @@ private fun DateTimeEditorDialog(
                 timeShortcuts = {
                     DateTimeShortcutButton(
                         icon = Icons.Outlined.Coffee,
-                        text = "上午 9",
+                        text = "9:00",
                         selected = selectedTime == NINE_AM_MILLIS_OF_DAY,
                     ) {
                         selectedTime = NINE_AM_MILLIS_OF_DAY
                     }
                     DateTimeShortcutButton(
                         icon = Icons.Outlined.WbSunny,
-                        text = "下午 1",
+                        text = "13:00",
                         selected = selectedTime == ONE_PM_MILLIS_OF_DAY,
                     ) {
                         selectedTime = ONE_PM_MILLIS_OF_DAY
                     }
                     DateTimeShortcutButton(
                         icon = Icons.Outlined.WbTwilight,
-                        text = "下午 5",
+                        text = "17:00",
                         selected = selectedTime == FIVE_PM_MILLIS_OF_DAY,
                     ) {
                         selectedTime = FIVE_PM_MILLIS_OF_DAY
                     }
                     DateTimeShortcutButton(
                         icon = Icons.Outlined.NightsStay,
-                        text = "下午 8",
+                        text = "20:00",
                         selected = selectedTime == EIGHT_PM_MILLIS_OF_DAY,
                     ) {
                         selectedTime = EIGHT_PM_MILLIS_OF_DAY
                     }
-                    DateTimeShortcutButton(Icons.Outlined.AccessTime, "挑选时间", selected = false) {
+                    DateTimeShortcutButton(Icons.Outlined.AccessTime, stringResource(R.string.select_specific_time), selected = false) {
                         showTimePicker = true
                     }
                     if (picker != EditorPicker.REMINDER) {
                         DateTimeShortcutButton(
                             icon = Icons.Outlined.Block,
-                            text = "无时间",
+                            text = stringResource(R.string.none),
                             selected = selectedTime == EDITOR_NO_TIME && selectedDay != START_DUE_TIME,
                         ) {
                             selectedTime = EDITOR_NO_TIME
@@ -2274,7 +2284,7 @@ private fun DateTimeEditorDialog(
                     title = {},
                     showModeToggle = false,
                     colors = DatePickerDefaults.colors(
-                        containerColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.surface,
                     ),
                 )
             }
@@ -2309,10 +2319,10 @@ private fun DateTimeEditorDialog(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                     TextButton(onClick = onDismiss) {
-                        Text("取消")
+                        Text(stringResource(R.string.cancel))
                     }
                     TextButton(onClick = ::finishSelection) {
-                        Text("确定")
+                        Text(stringResource(R.string.confirm))
                     }
                 }
             }
@@ -2404,7 +2414,7 @@ private fun EditorTimePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         text = {
             TimePicker(state = state)
@@ -2415,12 +2425,12 @@ private fun EditorTimePickerDialog(
                     onConfirm(state.hour * HOUR_MILLIS_OF_DAY + state.minute * MINUTE_MILLIS_OF_DAY)
                 },
             ) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -2434,6 +2444,7 @@ private fun RepeatEditorDialog(
     onDismiss: () -> Unit,
     onConfirm: (String?, Int) -> Unit,
 ) {
+    val context = LocalContext.current
     val initial = remember(recurrence) { parseRepeatDraft(recurrence) }
     var frequency by remember(recurrence) { mutableStateOf(if (initial.frequency == RepeatFrequency.NONE) RepeatFrequency.WEEKLY else initial.frequency) }
     var intervalText by remember(recurrence) { mutableStateOf(initial.interval.toString()) }
@@ -2449,6 +2460,7 @@ private fun RepeatEditorDialog(
     var countText by remember(recurrence) { mutableStateOf(initial.count?.toString().orEmpty()) }
     var untilText by remember(recurrence) { mutableStateOf(initial.untilText.orEmpty()) }
     val validationError = repeatValidationError(
+        context = context,
         frequency = frequency,
         intervalText = intervalText,
         monthlyMode = monthlyMode,
@@ -2482,18 +2494,18 @@ private fun RepeatEditorDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Surface(color = Color.White) {
+        Surface(color = MaterialTheme.colorScheme.surface) {
             Scaffold(
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.surface,
                             titleContentColor = SaltTheme.colors.text,
                             navigationIconContentColor = SaltTheme.colors.text,
                             actionIconContentColor = SaltTheme.colors.highlight,
                         ),
                         title = {
-                            Text(text = "自定义重复周期")
+                            Text(text = stringResource(R.string.custom_repeat))
                         },
                         navigationIcon = {
                             IconButton(
@@ -2502,13 +2514,13 @@ private fun RepeatEditorDialog(
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                    contentDescription = "保存重复规则",
+                                    contentDescription = stringResource(R.string.confirm),
                                 )
                             }
                         },
                         actions = {
                             TextButton(onClick = onDismiss) {
-                                Text("取消", style = MaterialTheme.typography.bodyLarge)
+                                Text(stringResource(R.string.cancel), style = MaterialTheme.typography.bodyLarge)
                             }
                         },
                     )
@@ -2522,7 +2534,7 @@ private fun RepeatEditorDialog(
                     .padding(bottom = 28.dp)
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
-                RepeatSectionHeader("重复频率")
+                RepeatSectionHeader(stringResource(R.string.repeat_frequency))
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier
@@ -2551,7 +2563,7 @@ private fun RepeatEditorDialog(
                 if (frequency != RepeatFrequency.NONE) {
                     if (frequency == RepeatFrequency.WEEKLY) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-                        RepeatSectionHeader("重复于")
+                        RepeatSectionHeader(stringResource(R.string.repeat_on))
                         Spacer(modifier = Modifier.height(16.dp))
                         WeekdaySelector(
                             selected = weekDays,
@@ -2560,9 +2572,9 @@ private fun RepeatEditorDialog(
                     }
                     if (frequency == RepeatFrequency.MONTHLY) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-                        RepeatSectionHeader("重复于")
+                        RepeatSectionHeader(stringResource(R.string.repeat_on))
                         Spacer(modifier = Modifier.height(12.dp))
-                        RepeatOptionRow("按每月日期", monthlyMode == RepeatMonthlyMode.DAY_OF_MONTH) {
+                        RepeatOptionRow(stringResource(R.string.by_monthly_date), monthlyMode == RepeatMonthlyMode.DAY_OF_MONTH) {
                             monthlyMode = RepeatMonthlyMode.DAY_OF_MONTH
                         }
                         if (monthlyMode == RepeatMonthlyMode.DAY_OF_MONTH) {
@@ -2571,11 +2583,11 @@ private fun RepeatEditorDialog(
                                 onValueChange = { monthDayText = it.filter(Char::isDigit).take(2) },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
-                                label = { Text("每月第几天") },
+                                label = { Text(stringResource(R.string.monthly_day_label)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             )
                         }
-                        RepeatOptionRow("按星期位置", monthlyMode == RepeatMonthlyMode.DAY_OF_WEEK) {
+                        RepeatOptionRow(stringResource(R.string.by_week_position), monthlyMode == RepeatMonthlyMode.DAY_OF_WEEK) {
                             monthlyMode = RepeatMonthlyMode.DAY_OF_WEEK
                         }
                         if (monthlyMode == RepeatMonthlyMode.DAY_OF_WEEK) {
@@ -2588,7 +2600,7 @@ private fun RepeatEditorDialog(
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 singleLine = true,
-                                label = { Text("第几个星期，-1 为最后") },
+                                label = { Text(stringResource(R.string.week_position_label)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             )
                             Spacer(modifier = Modifier.height(10.dp))
@@ -2601,13 +2613,13 @@ private fun RepeatEditorDialog(
                         }
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-                    RepeatSectionHeader("结束")
+                    RepeatSectionHeader(stringResource(R.string.end))
                     Spacer(modifier = Modifier.height(12.dp))
                     RepeatEndRow(
                         selected = endMode == RepeatEndMode.NEVER,
                         onClick = { endMode = RepeatEndMode.NEVER },
                     ) {
-                        Text("永不", fontSize = 16.sp)
+                        Text(stringResource(R.string.never), fontSize = 16.sp)
                     }
                     var showUntilDatePicker by remember { mutableStateOf(false) }
                     if (showUntilDatePicker) {
@@ -2639,15 +2651,15 @@ private fun RepeatEditorDialog(
                                         untilText = "%04d-%02d-%02d".format(d.year, d.monthValue, d.dayOfMonth)
                                     }
                                     showUntilDatePicker = false
-                                }) { Text("确定") }
+                                }) { Text(stringResource(R.string.confirm)) }
                             },
                             dismissButton = {
-                                TextButton(onClick = { showUntilDatePicker = false }) { Text("取消") }
+                                TextButton(onClick = { showUntilDatePicker = false }) { Text(stringResource(R.string.cancel)) }
                             },
                             tonalElevation = 0.dp,
                             properties = DialogProperties(usePlatformDefaultWidth = false),
                             colors = DatePickerDefaults.colors(
-                                containerColor = Color.White,
+                                containerColor = MaterialTheme.colorScheme.surface,
                             ),
                         ) {
                             BoxWithConstraints(
@@ -2666,20 +2678,20 @@ private fun RepeatEditorDialog(
                                     ) {
                                         DatePicker(
                                             state = untilPickerState,
-                                            title = { Text("选择日期", modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
+                                            title = { Text(stringResource(R.string.select_date), modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
                                             showModeToggle = false,
                                             colors = DatePickerDefaults.colors(
-                                                containerColor = Color.White,
+                                                containerColor = MaterialTheme.colorScheme.surface,
                                             ),
                                         )
                                     }
                                 } else {
                                     DatePicker(
                                         state = untilPickerState,
-                                        title = { Text("选择日期", modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
+                                        title = { Text(stringResource(R.string.select_date), modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
                                         showModeToggle = false,
                                         colors = DatePickerDefaults.colors(
-                                            containerColor = Color.White,
+                                            containerColor = MaterialTheme.colorScheme.surface,
                                         ),
                                     )
                                 }
@@ -2690,7 +2702,7 @@ private fun RepeatEditorDialog(
                         selected = endMode == RepeatEndMode.UNTIL,
                         onClick = { endMode = RepeatEndMode.UNTIL },
                     ) {
-                        Text("于", fontSize = 16.sp)
+                        Text(stringResource(R.string.on_date), fontSize = 16.sp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
@@ -2704,7 +2716,7 @@ private fun RepeatEditorDialog(
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(
-                                text = untilText.ifEmpty { "选择日期" },
+                                text = untilText.ifEmpty { stringResource(R.string.select_date) },
                                 fontSize = 16.sp,
                                 color = if (untilText.isEmpty()) SaltTheme.colors.text.copy(alpha = 0.4f)
                                         else SaltTheme.colors.text,
@@ -2715,7 +2727,7 @@ private fun RepeatEditorDialog(
                         selected = endMode == RepeatEndMode.COUNT,
                         onClick = { endMode = RepeatEndMode.COUNT },
                     ) {
-                        Text("前有", fontSize = 16.sp)
+                        Text(stringResource(R.string.after_n_occurrences), fontSize = 16.sp)
                         Spacer(modifier = Modifier.width(8.dp))
                         OutlinedTextField(
                             value = countText,
@@ -2732,7 +2744,7 @@ private fun RepeatEditorDialog(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("次发生", fontSize = 16.sp)
+                        Text(stringResource(R.string.n_occurrences), fontSize = 16.sp)
                     }
                     validationError?.let {
                         Text(
@@ -2804,13 +2816,13 @@ private fun RepeatFrequencySpinner(
     frequency: RepeatFrequency,
     onSelected: (RepeatFrequency) -> Unit,
 ) {
-    val labels = listOf("天", "周", "月", "年")
+    val labels = listOf(stringResource(R.string.day_unit), stringResource(R.string.week_unit), stringResource(R.string.month_unit), stringResource(R.string.year_unit))
     val values = listOf(RepeatFrequency.DAILY, RepeatFrequency.WEEKLY, RepeatFrequency.MONTHLY, RepeatFrequency.YEARLY)
     val currentLabel = when (frequency) {
-        RepeatFrequency.DAILY -> "天"
-        RepeatFrequency.MONTHLY -> "月"
-        RepeatFrequency.YEARLY -> "年"
-        else -> "周"
+        RepeatFrequency.DAILY -> stringResource(R.string.day_unit)
+        RepeatFrequency.MONTHLY -> stringResource(R.string.month_unit)
+        RepeatFrequency.YEARLY -> stringResource(R.string.year_unit)
+        else -> stringResource(R.string.week_unit)
     }
     var expanded by remember { mutableStateOf(false) }
     Box(
@@ -2853,13 +2865,13 @@ private fun WeekdaySelector(
     onChange: (Set<DayOfWeek>) -> Unit,
 ) {
     val days = listOf(
-        DayOfWeek.MONDAY to "一",
-        DayOfWeek.TUESDAY to "二",
-        DayOfWeek.WEDNESDAY to "三",
-        DayOfWeek.THURSDAY to "四",
-        DayOfWeek.FRIDAY to "五",
-        DayOfWeek.SATURDAY to "六",
-        DayOfWeek.SUNDAY to "日",
+        DayOfWeek.MONDAY to stringResource(R.string.mon_short),
+        DayOfWeek.TUESDAY to stringResource(R.string.tue_short),
+        DayOfWeek.WEDNESDAY to stringResource(R.string.wed_short),
+        DayOfWeek.THURSDAY to stringResource(R.string.thu_short),
+        DayOfWeek.FRIDAY to stringResource(R.string.fri_short),
+        DayOfWeek.SATURDAY to stringResource(R.string.sat_short),
+        DayOfWeek.SUNDAY to stringResource(R.string.sun_short),
     )
     
     // 使用固定间距，确保7个按钮在一行显示
@@ -2971,6 +2983,7 @@ private fun RemindersDialog(
     onDismiss: () -> Unit,
     onConfirm: (List<TaskReminderDraft>) -> Unit,
 ) {
+    val context = LocalContext.current
     var drafts by remember(reminders) { mutableStateOf(reminders.dedupeReminders()) }
     var showCustomTime by remember { mutableStateOf(false) }
     val initialCustomTime = remember { LocalDate.now().plusDays(1).atTime(9, 0) }
@@ -3014,9 +3027,9 @@ private fun RemindersDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("提醒") },
+        title = { Text(stringResource(R.string.reminders)) },
         text = {
             Column(
                 modifier = Modifier
@@ -3025,19 +3038,19 @@ private fun RemindersDialog(
             ) {
                 if (drafts.isEmpty()) {
                     Text(
-                        text = "没有提醒",
+                        text = stringResource(R.string.no_reminders),
                         color = SaltTheme.colors.subText,
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
                 } else {
                     Text(
-                        text = "已添加提醒",
+                        text = stringResource(R.string.reminders_added),
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                     drafts.forEach { reminder ->
                         ReminderDraftRow(
-                            label = reminderLabel(reminder, startDate, dueDate, settings),
+                            label = reminderLabel(context, reminder, startDate, dueDate, settings),
                             onEdit = { editReminder(reminder) },
                             onRemove = { drafts = drafts.filterNot { it == reminder } },
                         )
@@ -3046,21 +3059,21 @@ private fun RemindersDialog(
                 }
 
                 if (startDate > 0) {
-                    DialogChoice("开始时") {
+                    DialogChoice(stringResource(R.string.at_start)) {
                         addReminder(TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START))
                     }
-                    DialogChoice("开始前 10 分钟") {
+                    DialogChoice(stringResource(R.string.before_start_10)) {
                         addReminder(TaskReminderDraft(time = -TEN_MINUTES_MILLIS, type = Alarm.TYPE_REL_START))
                     }
                 }
                 if (dueDate > 0) {
-                    DialogChoice("到期时") {
+                    DialogChoice(stringResource(R.string.at_due)) {
                         addReminder(TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END))
                     }
-                    DialogChoice("提前 10 分钟") {
+                    DialogChoice(stringResource(R.string.before_due_10)) {
                         addReminder(TaskReminderDraft(time = -TEN_MINUTES_MILLIS, type = Alarm.TYPE_REL_END))
                     }
-                    DialogChoice("逾期后每天提醒") {
+                    DialogChoice(stringResource(R.string.overdue_daily_reminder)) {
                         addReminder(
                             TaskReminderDraft(
                                 time = ONE_DAY_MILLIS,
@@ -3071,7 +3084,7 @@ private fun RemindersDialog(
                         )
                     }
                 }
-                DialogChoice("明天 9:00") {
+                DialogChoice(stringResource(R.string.tomorrow_900)) {
                     addReminder(
                         TaskReminderDraft(
                             time = LocalDate.now().plusDays(1).atTime(9, 0).toMillis(),
@@ -3079,21 +3092,21 @@ private fun RemindersDialog(
                         )
                     )
                 }
-                DialogChoice("自定义提醒") {
+                DialogChoice(stringResource(R.string.custom_reminder)) {
                     editingReminder = null
                     customReminder = TaskReminderDraft(
                         time = -TEN_MINUTES_MILLIS,
                         type = if (dueDate > 0 || startDate <= 0) Alarm.TYPE_REL_END else Alarm.TYPE_REL_START,
                     )
                 }
-                DialogChoice(if (showCustomTime) "收起具体时间" else "选择具体时间") {
+                DialogChoice(if (showCustomTime) stringResource(R.string.collapse_specific_time) else stringResource(R.string.choose_specific_time)) {
                     showCustomTime = !showCustomTime
                 }
                 if (showCustomTime) {
                     DatePicker(
                         state = datePickerState,
                         colors = DatePickerDefaults.colors(
-                            containerColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.surface,
                         ),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -3103,7 +3116,7 @@ private fun RemindersDialog(
                             modifier = Modifier.width(88.dp),
                             singleLine = true,
                             isError = hour == null || hour !in 0..23,
-                            label = { Text(if (settings.use24HourTime) "小时" else "Hour") },
+                            label = { Text(stringResource(R.string.hour)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
                         OutlinedTextField(
@@ -3112,7 +3125,7 @@ private fun RemindersDialog(
                             modifier = Modifier.width(88.dp),
                             singleLine = true,
                             isError = minute == null || minute !in 0..59,
-                            label = { Text("分钟") },
+                            label = { Text(stringResource(R.string.minute)) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         )
                     }
@@ -3131,26 +3144,26 @@ private fun RemindersDialog(
                             showCustomTime = false
                         },
                     ) {
-                        Text("添加具体时间")
+                        Text(stringResource(R.string.add_specific_time))
                     }
                 }
-                DialogChoice("随机提醒") {
+                DialogChoice(stringResource(R.string.random_reminder)) {
                     editingReminder = null
                     randomReminder = TaskReminderDraft(time = ONE_DAY_MILLIS, type = Alarm.TYPE_RANDOM)
                 }
                 if (drafts.isNotEmpty()) {
-                    DialogChoice("清空提醒") { drafts = emptyList() }
+                    DialogChoice(stringResource(R.string.clear_reminders)) { drafts = emptyList() }
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(drafts.dedupeReminders()) }) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -3223,9 +3236,9 @@ private fun AbsoluteReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("具体时间") },
+        title = { Text(stringResource(R.string.specific_time)) },
         text = {
             Column(
                 modifier = Modifier
@@ -3235,7 +3248,7 @@ private fun AbsoluteReminderDialog(
                 DatePicker(
                     state = datePickerState,
                     colors = DatePickerDefaults.colors(
-                        containerColor = Color.White,
+                        containerColor = MaterialTheme.colorScheme.surface,
                     ),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -3245,7 +3258,7 @@ private fun AbsoluteReminderDialog(
                         modifier = Modifier.width(88.dp),
                         singleLine = true,
                         isError = hour == null || hour !in 0..23,
-                        label = { Text(if (settings.use24HourTime) "小时" else "Hour") },
+                        label = { Text(stringResource(R.string.hour)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
                     OutlinedTextField(
@@ -3254,13 +3267,13 @@ private fun AbsoluteReminderDialog(
                         modifier = Modifier.width(88.dp),
                         singleLine = true,
                         isError = minute == null || minute !in 0..59,
-                        label = { Text("分钟") },
+                        label = { Text(stringResource(R.string.minute)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
                 }
                 if (timeError) {
                     Text(
-                        text = "请输入有效时间",
+                        text = stringResource(R.string.enter_valid_time),
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 8.dp),
@@ -3283,12 +3296,12 @@ private fun AbsoluteReminderDialog(
                     )
                 },
             ) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -3326,13 +3339,14 @@ private fun CustomRelativeReminderDialog(
     var repeatText by remember(reminder) { mutableStateOf((reminder.repeat.takeIf { it > 0 } ?: 4).toString()) }
     var showRecurringDialog by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val repeatLabel = remember(repeatEnabled, repeatText, intervalText, intervalUnit) {
         val count = repeatText.toIntOrNull() ?: 0
         val amt = intervalText.toIntOrNull() ?: 0
         if (repeatEnabled && count > 0 && amt > 0) {
-            "每 $amt ${intervalUnit.label}，重复 $count 次"
+            context.getString(R.string.every_n_unit, amt, context.getString(intervalUnit.labelRes, amt)) + " " + context.getString(R.string.repeat_count) + " $count " + context.getString(R.string.times)
         } else {
-            "不重复"
+            context.getString(R.string.no_repeat)
         }
     }
 
@@ -3340,9 +3354,9 @@ private fun CustomRelativeReminderDialog(
     val intervalAmount = intervalText.toIntOrNull()
     val repeatCount = repeatText.toIntOrNull()
     val validationError = when {
-        amount == null || amount < 0 -> "提醒时间不能小于 0"
-        repeatEnabled && (intervalAmount == null || intervalAmount <= 0) -> "重复间隔必须大于 0"
-        repeatEnabled && (repeatCount == null || repeatCount <= 0) -> "重复次数必须大于 0"
+        amount == null || amount < 0 -> context.getString(R.string.reminder_time_gte_0)
+        repeatEnabled && (intervalAmount == null || intervalAmount <= 0) -> context.getString(R.string.repeat_interval_gt_0)
+        repeatEnabled && (repeatCount == null || repeatCount <= 0) -> context.getString(R.string.repeat_count_gt_0)
         else -> null
     }
     val focusRequester = remember { FocusRequester() }
@@ -3356,9 +3370,9 @@ private fun CustomRelativeReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("自定义通知") },
+        title = { Text(stringResource(R.string.custom_notification)) },
         text = {
             Column(
                 modifier = Modifier
@@ -3394,7 +3408,7 @@ private fun CustomRelativeReminderDialog(
                             )
                         )
                         Text(
-                            text = unit.label(amount ?: 0),
+                            text = stringResource(unit.labelRes, amount ?: 0),
                             modifier = Modifier.weight(1f)
                         )
                         // Show before/due buttons only for selected unit
@@ -3415,7 +3429,7 @@ private fun CustomRelativeReminderDialog(
                                         if (relation == ReminderRelation.BEFORE) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f)
                                     )
                                 ) {
-                                    Text("前")
+                                    Text(stringResource(R.string.before))
                                 }
                                 OutlinedButton(
                                     onClick = { relation = ReminderRelation.AFTER },
@@ -3430,7 +3444,7 @@ private fun CustomRelativeReminderDialog(
                                         if (relation == ReminderRelation.AFTER) SaltTheme.colors.highlight else SaltTheme.colors.text.copy(alpha = 0.3f)
                                     )
                                 ) {
-                                    Text("到期")
+                                    Text(stringResource(R.string.due))
                                 }
                             }
                         }
@@ -3465,7 +3479,7 @@ private fun CustomRelativeReminderDialog(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "清除重复",
+                                contentDescription = stringResource(R.string.clear_repeat),
                                 tint = SaltTheme.colors.text.copy(alpha = 0.4f)
                             )
                         }
@@ -3498,12 +3512,12 @@ private fun CustomRelativeReminderDialog(
                     )
                 },
             ) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -3516,17 +3530,18 @@ private fun CustomRelativeReminderDialog(
         val tempIntervalAmount = tempIntervalText.toIntOrNull()
         val tempRepeatCount = tempRepeatText.toIntOrNull()
         
+        val context = LocalContext.current
         val subValidationError = when {
-            tempIntervalAmount == null || tempIntervalAmount <= 0 -> "重复间隔必须大于 0"
-            tempRepeatCount == null || tempRepeatCount <= 0 -> "重复次数必须大于 0"
+            tempIntervalAmount == null || tempIntervalAmount <= 0 -> context.getString(R.string.repeat_interval_gt_0)
+            tempRepeatCount == null || tempRepeatCount <= 0 -> context.getString(R.string.repeat_count_gt_0)
             else -> null
         }
-        
+
         AlertDialog(
             onDismissRequest = { showRecurringDialog = false },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("重复") },
+            title = { Text(stringResource(R.string.repeat)) },
             text = {
                 Column(
                     modifier = Modifier
@@ -3540,7 +3555,7 @@ private fun CustomRelativeReminderDialog(
                         singleLine = true,
                         isError = tempIntervalAmount == null || tempIntervalAmount <= 0,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        label = { Text("重复间隔") }
+                        label = { Text(stringResource(R.string.repeat_interval)) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     
@@ -3561,7 +3576,7 @@ private fun CustomRelativeReminderDialog(
                                )
                            )
                            Text(
-                               text = unit.label(tempIntervalAmount ?: 0),
+                               text = stringResource(unit.labelRes, tempIntervalAmount ?: 0),
                                modifier = Modifier.weight(1f)
                            )
                         }
@@ -3581,9 +3596,9 @@ private fun CustomRelativeReminderDialog(
                             singleLine = true,
                             isError = tempRepeatCount == null || tempRepeatCount <= 0,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            label = { Text("重复次数") }
+                            label = { Text(stringResource(R.string.repeat_count)) }
                         )
-                        Text("次")
+                        Text(stringResource(R.string.times))
                     }
                     
                     if (subValidationError != null) {
@@ -3607,12 +3622,12 @@ private fun CustomRelativeReminderDialog(
                         showRecurringDialog = false
                     }
                 ) {
-                    Text("确定")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRecurringDialog = false }) {
-                    Text("取消")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -3631,7 +3646,7 @@ private fun RandomReminderDialog(
     }
     var selectedUnit by remember(reminder) { mutableStateOf(initialUnit) }
     val amount = amountText.toIntOrNull()
-    val validationError = if (amount == null || amount <= 0) "随机提醒间隔必须大于 0" else null
+    val validationError = if (amount == null || amount <= 0) stringResource(R.string.random_interval_gt_0) else null
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -3643,9 +3658,9 @@ private fun RandomReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("随机提醒") },
+        title = { Text(stringResource(R.string.random_reminder)) },
         text = {
             Column(
                 modifier = Modifier
@@ -3653,7 +3668,7 @@ private fun RandomReminderDialog(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = "随机每",
+                    text = stringResource(R.string.randomly_every),
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -3669,7 +3684,7 @@ private fun RandomReminderDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 ReminderUnit.values().forEach { unit ->
-                    RepeatOptionRow(unit.label(amount ?: 0), selectedUnit == unit) {
+                    RepeatOptionRow(stringResource(unit.labelRes, amount ?: 0), selectedUnit == unit) {
                         selectedUnit = unit
                     }
                 }
@@ -3695,12 +3710,12 @@ private fun RandomReminderDialog(
                     )
                 },
             ) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -3728,7 +3743,7 @@ private fun ReminderDraftRow(
         IconButton(onClick = onRemove) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "删除提醒",
+                contentDescription = stringResource(R.string.delete_reminder),
             )
         }
     }
@@ -3744,6 +3759,7 @@ private fun InlineReminderSection(
     isNew: Boolean,
     onRemindersChange: (List<TaskReminderDraft>) -> Unit,
 ) {
+    val context = LocalContext.current
     var showAddPicker     by remember { mutableStateOf(false) }
     var editingReminder   by remember { mutableStateOf<TaskReminderDraft?>(null) }
     var customDialog      by remember { mutableStateOf<TaskReminderDraft?>(null) }
@@ -3772,34 +3788,31 @@ private fun InlineReminderSection(
     if (showAddPicker) {
         AlertDialog(
             onDismissRequest = { showAddPicker = false },
-            title = { 
+            title = {
                 Text(
-                    text = "添加提醒",
+                    text = stringResource(R.string.add_reminder),
                     style = MaterialTheme.typography.titleLarge,
                     color = SaltTheme.colors.text,
-                ) 
+                )
             },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             text = {
                 Column {
-                    // 开始时提醒
-                    DialogChoice(text = "开始时提醒") {
+                    DialogChoice(text = stringResource(R.string.at_start_reminder)) {
                         onRemindersChange(
                             (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_START))
                                 .dedupeReminders()
                         )
                         showAddPicker = false
                     }
-                    // 到期时提醒
-                    DialogChoice(text = "到期时提醒") {
+                    DialogChoice(text = stringResource(R.string.at_due_reminder)) {
                         onRemindersChange(
                             (reminders + TaskReminderDraft(time = 0L, type = Alarm.TYPE_REL_END))
                                 .dedupeReminders()
                         )
                         showAddPicker = false
                     }
-                    // 逾期后每天提醒
-                    DialogChoice(text = "逾期后每天提醒") {
+                    DialogChoice(text = stringResource(R.string.overdue_daily_reminder)) {
                         onRemindersChange(
                             (reminders + TaskReminderDraft(
                                 time = ONE_DAY_MILLIS,
@@ -3810,13 +3823,11 @@ private fun InlineReminderSection(
                         )
                         showAddPicker = false
                     }
-                    // 选择日期和时间
-                    DialogChoice(text = "选择日期和时间") {
+                    DialogChoice(text = stringResource(R.string.select_date_and_time)) {
                         showDateTimePicker = true
                         showAddPicker = false
                     }
-                    // 自定义
-                    DialogChoice(text = "自定义") {
+                    DialogChoice(text = stringResource(R.string.custom)) {
                         customDialog = TaskReminderDraft(time = -15 * ONE_MINUTE_MILLIS, type = Alarm.TYPE_REL_END)
                         showAddPicker = false
                     }
@@ -3826,7 +3837,7 @@ private fun InlineReminderSection(
             dismissButton = {
                 TextButton(onClick = { showAddPicker = false }) {
                     Text(
-                        text = "取消",
+                        text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.bodyLarge,
                         color = SaltTheme.colors.highlight,
                     )
@@ -3852,7 +3863,7 @@ private fun InlineReminderSection(
             )
             Spacer(modifier = Modifier.width(32.dp))
             Text(
-                text  = "添加提醒",
+                text  = stringResource(R.string.add_reminder),
                 color = SaltTheme.colors.text.copy(alpha = 0.48f),
                 fontSize = 16.sp,
                 modifier = Modifier.weight(1f),
@@ -3861,7 +3872,7 @@ private fun InlineReminderSection(
         Column(modifier = Modifier.padding(start = 76.dp, end = 4.dp)) {
             reminders.forEach { r ->
                 ReminderDraftRow(
-                    label  = reminderLabel(r, startDate, dueDate, settings),
+                    label  = reminderLabel(context, r, startDate, dueDate, settings),
                     onEdit = { edit(r) },
                     onRemove = {
                         onRemindersChange(reminders.filterNot { it == r })
@@ -3980,7 +3991,7 @@ private fun InlineSubtasksSection(
             )
             Spacer(modifier = Modifier.width(32.dp))
             Text(
-                text = "添加子任务",
+                text = stringResource(R.string.add_subtask),
                 color = SaltTheme.colors.text.copy(alpha = 0.38f),
                 fontSize = 16.sp,
                 modifier = Modifier
@@ -4033,8 +4044,8 @@ private fun InlineSubtaskDraftRow(
                 checked = draft.completed,
                 onCheckedChange = { onToggle() },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color(0xFF5AA7DE),
-                    uncheckedColor = Color(0xFF5AA7DE),
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    uncheckedColor = MaterialTheme.colorScheme.primary,
                     checkmarkColor = Color.White,
                 ),
                 modifier = Modifier
@@ -4069,8 +4080,8 @@ private fun InlineSubtaskDraftRow(
         ) {
             Icon(
                 imageVector = Icons.Filled.Close,
-                contentDescription = "删除子任务",
-                tint = Color(0xFF6E6E6E),
+                contentDescription = stringResource(R.string.delete_subtask),
+                tint = SaltTheme.colors.subText,
                 modifier = Modifier.size(28.dp),
             )
         }
@@ -4096,14 +4107,14 @@ private fun AttachmentsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
-        title = { Text("附件") },
+        title = { Text(stringResource(R.string.attachments)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (attachments.isEmpty()) {
                     Text(
-                        text = "还没有附件",
+                        text = stringResource(R.string.no_attachments_yet),
                         color = SaltTheme.colors.subText,
                     )
                 } else {
@@ -4118,13 +4129,13 @@ private fun AttachmentsDialog(
                     }
                 }
                 TextButton(onClick = onAdd) {
-                    Text("添加附件")
+                    Text(stringResource(R.string.add_attachment))
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("完成")
+                Text(stringResource(R.string.done))
             }
         },
     )
@@ -4132,21 +4143,21 @@ private fun AttachmentsDialog(
     pendingDelete?.let { attachment ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            title = { Text("删除附件") },
-            text = { Text("删除“${attachment.name}”？") },
+            title = { Text(stringResource(R.string.delete_attachment)) },
+            text = { Text(stringResource(R.string.delete_attachment_confirm, attachment.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     pendingDelete = null
                     onRemove(attachment)
                 }) {
-                    Text("删除")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingDelete = null }) {
-                    Text("取消")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -4177,7 +4188,7 @@ private fun AttachmentItemRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = if (permissionValid) "点击打开" else "权限可能已失效",
+                text = if (permissionValid) stringResource(R.string.click_to_open) else stringResource(R.string.permission_may_expire),
                 color = if (permissionValid) {
                     SaltTheme.colors.subText
                 } else {
@@ -4190,7 +4201,7 @@ private fun AttachmentItemRow(
             IconButton(onClick = { menuExpanded = true }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
-                    contentDescription = "附件操作",
+                    contentDescription = stringResource(R.string.attachment_actions),
                 )
             }
             DropdownMenu(
@@ -4198,14 +4209,14 @@ private fun AttachmentItemRow(
                 onDismissRequest = { menuExpanded = false },
             ) {
                 DropdownMenuItem(
-                    text = { Text("打开") },
+                    text = { Text(stringResource(R.string.open)) },
                     onClick = {
                         menuExpanded = false
                         onOpen()
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text("分享") },
+                    text = { Text(stringResource(R.string.share)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Share,
@@ -4218,7 +4229,7 @@ private fun AttachmentItemRow(
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text("删除") },
+                    text = { Text(stringResource(R.string.delete)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -4255,7 +4266,7 @@ private fun TextValueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         title = { Text(title) },
         text = {
@@ -4271,12 +4282,12 @@ private fun TextValueDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(text) }) {
-                Text("确定")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -4306,11 +4317,11 @@ private enum class TextEditorTarget {
     NOTES,
 }
 
-private enum class ReminderUnit(val millis: Long, val label: String) {
-    MINUTES(ONE_MINUTE_MILLIS, "分钟"),
-    HOURS(ONE_HOUR_MILLIS, "小时"),
-    DAYS(ONE_DAY_MILLIS, "天"),
-    WEEKS(ONE_WEEK_MILLIS, "周"),
+private enum class ReminderUnit(val millis: Long, @StringRes val labelRes: Int) {
+    MINUTES(ONE_MINUTE_MILLIS, R.string.n_minutes),
+    HOURS(ONE_HOUR_MILLIS, R.string.n_hours),
+    DAYS(ONE_DAY_MILLIS, R.string.n_days),
+    WEEKS(ONE_WEEK_MILLIS, R.string.n_weeks),
 }
 
 private enum class ReminderRelation {
@@ -4324,9 +4335,13 @@ private enum class ReminderAnchor(val alarmType: Int) {
 }
 
 private data class TaskDisplayGroup(
-    val title: String,
+    @StringRes val titleRes: Int = 0,
+    val dynamicTitle: String? = null,
+    val sortIndex: Int = 0,
     val tasks: List<Task>,
-)
+) {
+    val title: String get() = dynamicTitle ?: ""
+}
 
 @Composable
 private fun TaskList(
@@ -4362,9 +4377,9 @@ private fun TaskList(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         groups.forEach { group ->
-            if (group.title.isNotBlank()) {
-                item(key = "task_group_${group.title}") {
-                    TaskGroupHeader(group.title)
+            if (group.titleRes != 0 || !group.dynamicTitle.isNullOrBlank()) {
+                item(key = "task_group_${group.titleRes}_${group.dynamicTitle}") {
+                    TaskGroupHeader(group)
                 }
             }
             items(group.tasks, key = { it.id }) { task ->
@@ -4391,7 +4406,8 @@ private fun TaskList(
 }
 
 @Composable
-private fun TaskGroupHeader(title: String) {
+private fun TaskGroupHeader(group: TaskDisplayGroup) {
+    val title = if (group.titleRes != 0) stringResource(group.titleRes) else group.dynamicTitle.orEmpty()
     Text(
         text = title,
         color = SaltTheme.colors.subText,
@@ -4464,28 +4480,28 @@ private fun TaskSwipeBackground() {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize()
-                .background(Color(0xFF43A047).copy(alpha = 0.16f))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
                 .padding(start = 20.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
             Icon(
                 imageVector = Icons.Outlined.CheckCircle,
                 contentDescription = "Complete",
-                tint = Color(0xFF2E7D32),
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize()
-                .background(Color(0xFFE53935).copy(alpha = 0.14f))
+                .background(MaterialTheme.colorScheme.error.copy(alpha = 0.14f))
                 .padding(end = 20.dp),
             contentAlignment = Alignment.CenterEnd,
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete",
-                tint = Color(0xFFC62828),
+                tint = MaterialTheme.colorScheme.error,
             )
         }
     }
@@ -4581,7 +4597,7 @@ private fun TaskItem(
                 if (settings.showStartDate && task.hideUntil > 0) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "开始 ${formatShortDate(task.hideUntil, settings)}",
+                        text = stringResource(R.string.start_prefix, formatShortDate(task.hideUntil, settings)),
                         style = MaterialTheme.typography.bodySmall,
                         color = SaltTheme.colors.subText,
                     )
@@ -4590,7 +4606,7 @@ private fun TaskItem(
                     Spacer(modifier = Modifier.height(2.dp))
                     val isOverdue = task.dueDate < System.currentTimeMillis() && !task.isCompleted
                     Text(
-                        text = "截止 ${formatShortDate(task.dueDate, settings)}",
+                        text = stringResource(R.string.due_prefix, formatShortDate(task.dueDate, settings)),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isOverdue) Color(0xFFE53935) else SaltTheme.colors.subText,
                     )
@@ -4677,7 +4693,7 @@ private fun TaskInlineSubtasks(
         val remaining = subtasks.count { it.title.isNotBlank() } - visibleSubtasks.size
         if (remaining > 0) {
             Text(
-                text = "还有 $remaining 个子任务",
+                text = stringResource(R.string.n_subtasks_remaining, remaining),
                 color = SaltTheme.colors.subText.copy(alpha = 0.72f),
                 fontSize = 12.sp,
             )
@@ -4690,13 +4706,13 @@ private fun TaskInlineSubtasks(
 private fun TaskExtrasChips(extras: TaskListExtras) {
     val chips = buildList {
         if (extras.subtaskCount > 0) {
-            add("${extras.completedSubtaskCount}/${extras.subtaskCount} 子任务")
+            add(stringResource(R.string.n_subtasks_n_completed, extras.completedSubtaskCount, extras.subtaskCount))
         }
         if (extras.attachmentCount > 0) {
-            add("${extras.attachmentCount} 附件")
+            add(stringResource(R.string.n_attachments, extras.attachmentCount))
         }
         if (extras.reminderCount > 0) {
-            add("${extras.reminderCount} 提醒")
+            add(stringResource(R.string.n_reminders, extras.reminderCount))
         }
         extras.tagNames.take(3).forEach { add("#$it") }
     }
@@ -4721,12 +4737,21 @@ private fun TaskExtrasChips(extras: TaskListExtras) {
     }
 }
 
+private data class GroupKey(
+    @StringRes val titleRes: Int = 0,
+    val dynamicTitle: String? = null,
+    val sortIndex: Int = 0,
+)
+
 private fun List<Task>.groupForDisplay(): List<TaskDisplayGroup> {
     val zone = ZoneId.systemDefault()
     val today = LocalDate.now(zone)
-    return groupBy { task -> task.displayGroupTitle(today, zone) }
-        .map { (title, tasks) -> TaskDisplayGroup(title = title, tasks = tasks) }
-        .sortedBy { it.title.displayGroupSortIndex() }
+    return groupBy { task ->
+        val (res, idx) = task.displayGroupKey(today, zone)
+        GroupKey(titleRes = res, sortIndex = idx)
+    }
+        .map { (key, tasks) -> TaskDisplayGroup(titleRes = key.titleRes, sortIndex = key.sortIndex, tasks = tasks) }
+        .sortedBy { it.sortIndex }
 }
 
 private fun List<Task>.groupForDisplay(
@@ -4735,27 +4760,51 @@ private fun List<Task>.groupForDisplay(
     extras: Map<Long, TaskListExtras>,
 ): List<TaskDisplayGroup> {
     if (groupMode == TaskSortMode.NONE) {
-        return listOf(TaskDisplayGroup(title = "", tasks = this))
+        return listOf(TaskDisplayGroup(tasks = this))
     }
     val zone = ZoneId.systemDefault()
     val today = LocalDate.now(zone)
     val groups = groupBy { task ->
         when (groupMode) {
-            TaskSortMode.DUE_DATE -> task.dueDateGroupTitle(today, zone)
-            TaskSortMode.START_DATE -> task.startDateGroupTitle(today, zone)
-            TaskSortMode.PRIORITY -> task.priorityGroupTitle()
-            TaskSortMode.MODIFIED -> task.timestampGroupTitle(task.modificationDate, "未修改", today, zone)
-            TaskSortMode.CREATED -> task.timestampGroupTitle(task.creationDate, "未创建", today, zone)
-            TaskSortMode.LIST -> extras[task.id]?.tagNames?.firstOrNull()?.takeIf { it.isNotBlank() } ?: "无清单"
-            TaskSortMode.COMPLETED -> task.timestampGroupTitle(task.completionDate, "未完成", today, zone)
-            TaskSortMode.TITLE -> task.title.orEmpty().firstOrNull()?.uppercaseChar()?.toString() ?: "#"
+            TaskSortMode.DUE_DATE -> {
+                val (res, idx) = task.dueDateGroupKey(today, zone)
+                GroupKey(titleRes = res, sortIndex = idx)
+            }
+            TaskSortMode.START_DATE -> {
+                val (res, idx) = task.startDateGroupKey(today, zone)
+                GroupKey(titleRes = res, sortIndex = idx)
+            }
+            TaskSortMode.PRIORITY -> {
+                val (res, idx) = task.priorityGroupKey()
+                GroupKey(titleRes = res, sortIndex = idx)
+            }
+            TaskSortMode.MODIFIED -> {
+                val (res, idx) = task.timestampGroupKey(task.modificationDate, R.string.not_modified, today, zone)
+                GroupKey(titleRes = res, sortIndex = idx)
+            }
+            TaskSortMode.CREATED -> {
+                val (res, idx) = task.timestampGroupKey(task.creationDate, R.string.not_created, today, zone)
+                GroupKey(titleRes = res, sortIndex = idx)
+            }
+            TaskSortMode.LIST -> {
+                val name = extras[task.id]?.tagNames?.firstOrNull()?.takeIf { it.isNotBlank() }
+                GroupKey(dynamicTitle = name, sortIndex = name?.firstOrNull()?.code ?: Int.MAX_VALUE)
+            }
+            TaskSortMode.COMPLETED -> {
+                val (res, idx) = task.timestampGroupKey(task.completionDate, R.string.not_completed, today, zone)
+                GroupKey(titleRes = res, sortIndex = idx)
+            }
+            TaskSortMode.TITLE -> {
+                val ch = task.title.orEmpty().firstOrNull()?.uppercaseChar()?.toString() ?: "#"
+                GroupKey(dynamicTitle = ch, sortIndex = ch.firstOrNull()?.code ?: Int.MAX_VALUE)
+            }
             TaskSortMode.MY_ORDER,
             TaskSortMode.AUTO,
-            TaskSortMode.NONE -> ""
+            TaskSortMode.NONE -> GroupKey()
         }
     }
-        .map { (title, tasks) -> TaskDisplayGroup(title = title, tasks = tasks) }
-        .sortedBy { it.groupSortIndex(groupMode) }
+        .map { (key, tasks) -> TaskDisplayGroup(titleRes = key.titleRes, dynamicTitle = key.dynamicTitle, sortIndex = key.sortIndex, tasks = tasks) }
+        .sortedBy { it.sortIndex }
     return if (ascending) groups else groups.reversed()
 }
 
@@ -4823,123 +4872,67 @@ private fun List<TaskSubtaskDraft>.sortedSubtasksForDisplay(
     return if (ascending) sorted else sorted.reversed()
 }
 
-private fun Task.dueDateGroupTitle(today: LocalDate, zone: ZoneId): String {
-    if (isCompleted) return "已完成"
-    if (dueDate <= 0) return "无截止日期"
+private fun Task.dueDateGroupKey(today: LocalDate, zone: ZoneId): Pair<Int, Int> {
+    if (isCompleted) return R.string.group_completed to 6
+    if (dueDate <= 0) return R.string.group_no_due_date to 5
     val date = Instant.ofEpochMilli(dueDate).atZone(zone).toLocalDate()
     return when {
-        date.isBefore(today) -> "逾期"
-        date == today -> "今天"
-        date == today.plusDays(1) -> "明天"
-        date.isBefore(today.plusWeeks(1)) -> "未来 7 天"
-        else -> "以后"
+        date.isBefore(today) -> R.string.group_overdue to 0
+        date == today -> R.string.group_today to 1
+        date == today.plusDays(1) -> R.string.tomorrow to 2
+        date.isBefore(today.plusWeeks(1)) -> R.string.future_7_days to 3
+        else -> R.string.group_later to 4
     }
 }
 
-private fun Task.startDateGroupTitle(today: LocalDate, zone: ZoneId): String {
-    if (hideUntil <= 0) return "无开始日期"
+private fun Task.startDateGroupKey(today: LocalDate, zone: ZoneId): Pair<Int, Int> {
+    if (hideUntil <= 0) return R.string.group_no_start_date to 5
     val date = Instant.ofEpochMilli(hideUntil).atZone(zone).toLocalDate()
     return when {
-        date.isBefore(today) -> "已开始"
-        date == today -> "今天"
-        date == today.plusDays(1) -> "明天"
-        date.isBefore(today.plusWeeks(1)) -> "未来 7 天"
-        else -> "以后"
+        date.isBefore(today) -> R.string.started to 0
+        date == today -> R.string.group_today to 1
+        date == today.plusDays(1) -> R.string.tomorrow to 2
+        date.isBefore(today.plusWeeks(1)) -> R.string.future_7_days to 3
+        else -> R.string.group_later to 4
     }
 }
 
-private fun Task.timestampGroupTitle(
+private fun Task.timestampGroupKey(
     timestamp: Long,
-    emptyLabel: String,
+    @StringRes emptyRes: Int,
     today: LocalDate,
     zone: ZoneId,
-): String {
-    if (timestamp <= 0) return emptyLabel
+): Pair<Int, Int> {
+    if (timestamp <= 0) return emptyRes to 4
     val date = Instant.ofEpochMilli(timestamp).atZone(zone).toLocalDate()
     return when {
-        date == today -> "今天"
-        date == today.minusDays(1) -> "昨天"
-        date.isAfter(today.minusWeeks(1)) -> "过去 7 天"
-        else -> "更早"
+        date == today -> R.string.group_today to 0
+        date == today.minusDays(1) -> R.string.yesterday to 1
+        date.isAfter(today.minusWeeks(1)) -> R.string.past_7_days to 2
+        else -> R.string.earlier to 3
     }
 }
 
-private fun Task.priorityGroupTitle(): String =
+private fun Task.priorityGroupKey(): Pair<Int, Int> =
     when (priority) {
-        Task.Priority.HIGH -> "高优先级"
-        Task.Priority.MEDIUM -> "中优先级"
-        Task.Priority.LOW -> "低优先级"
-        else -> "无优先级"
+        Task.Priority.HIGH -> R.string.high_priority to 0
+        Task.Priority.MEDIUM -> R.string.medium_priority to 1
+        Task.Priority.LOW -> R.string.low_priority to 2
+        else -> R.string.no_priority to 3
     }
 
-private fun TaskDisplayGroup.groupSortIndex(mode: TaskSortMode): Int =
-    when (mode) {
-        TaskSortMode.DUE_DATE -> when (title) {
-            "逾期" -> 0
-            "今天" -> 1
-            "明天" -> 2
-            "未来 7 天" -> 3
-            "以后" -> 4
-            "无截止日期" -> 5
-            "已完成" -> 6
-            else -> 7
-        }
-        TaskSortMode.START_DATE -> when (title) {
-            "已开始" -> 0
-            "今天" -> 1
-            "明天" -> 2
-            "未来 7 天" -> 3
-            "以后" -> 4
-            "无开始日期" -> 5
-            else -> 6
-        }
-        TaskSortMode.PRIORITY -> when (title) {
-            "高优先级" -> 0
-            "中优先级" -> 1
-            "低优先级" -> 2
-            "无优先级" -> 3
-            else -> 4
-        }
-        TaskSortMode.MODIFIED,
-        TaskSortMode.CREATED,
-        TaskSortMode.COMPLETED -> when (title) {
-            "今天" -> 0
-            "昨天" -> 1
-            "过去 7 天" -> 2
-            "更早" -> 3
-            else -> 4
-        }
-        TaskSortMode.LIST,
-        TaskSortMode.TITLE -> title.firstOrNull()?.code ?: Int.MAX_VALUE
-        TaskSortMode.NONE,
-        TaskSortMode.MY_ORDER,
-        TaskSortMode.AUTO -> 0
-    }
-
-private fun Task.displayGroupTitle(today: LocalDate, zone: ZoneId): String {
-    if (isCompleted) return "已完成"
-    if (dueDate <= 0) return "无截止日期"
+private fun Task.displayGroupKey(today: LocalDate, zone: ZoneId): Pair<Int, Int> {
+    if (isCompleted) return R.string.group_completed to 6
+    if (dueDate <= 0) return R.string.group_no_due_date to 5
     val date = Instant.ofEpochMilli(dueDate).atZone(zone).toLocalDate()
     return when {
-        date.isBefore(today) -> "逾期"
-        date == today -> "今天"
-        date == today.plusDays(1) -> "明天"
-        date.isBefore(today.plusWeeks(1)) -> "未来 7 天"
-        else -> "以后"
+        date.isBefore(today) -> R.string.group_overdue to 0
+        date == today -> R.string.group_today to 1
+        date == today.plusDays(1) -> R.string.tomorrow to 2
+        date.isBefore(today.plusWeeks(1)) -> R.string.future_7_days to 3
+        else -> R.string.group_later to 4
     }
 }
-
-private fun String.displayGroupSortIndex(): Int =
-    when (this) {
-        "逾期" -> 0
-        "今天" -> 1
-        "明天" -> 2
-        "未来 7 天" -> 3
-        "以后" -> 4
-        "无截止日期" -> 5
-        "已完成" -> 6
-        else -> 7
-    }
 
 private fun parseTags(text: String): List<String> =
     text.split(',', '，', '#', ' ')
@@ -4950,36 +4943,38 @@ private fun mergeTaskTagList(tags: List<String>, defaultListName: String?): List
     (tags + listOfNotNull(defaultListName?.trim()?.takeIf { it.isNotBlank() }))
         .distinctBy { it.lowercase(Locale.getDefault()) }
 
-private fun subtaskSummary(subtasks: List<TaskSubtaskDraft>): String =
+private fun subtaskSummary(context: Context, subtasks: List<TaskSubtaskDraft>): String =
     when (val count = subtasks.count { it.title.isNotBlank() }) {
-        0 -> "添加子任务"
+        0 -> context.getString(R.string.add_subtask)
         1 -> subtasks.first { it.title.isNotBlank() }.title
         else -> {
             val completed = subtasks.count { it.title.isNotBlank() && it.completed }
-            "$count 个子任务 · $completed 已完成"
+            context.getString(R.string.n_subtasks_n_completed, completed, count)
         }
     }
 
-private fun attachmentSummary(attachments: List<TaskAttachmentDraft>): String =
+private fun attachmentSummary(context: Context, attachments: List<TaskAttachmentDraft>): String =
     when (attachments.size) {
-        0 -> "添加附件"
+        0 -> context.getString(R.string.add_attachment)
         1 -> attachments.first().name
-        else -> "${attachments.size} 个附件"
+        else -> context.getString(R.string.n_attachments, attachments.size)
     }
 
 private fun reminderSummary(
+    context: Context,
     reminders: List<TaskReminderDraft>,
     startDate: Long,
     dueDate: Long,
     settings: TaskSettings,
 ): String =
     when (reminders.size) {
-        0 -> "添加提醒"
-        1 -> reminderLabel(reminders.first(), startDate, dueDate, settings)
-        else -> "${reminders.size} 个提醒"
+        0 -> context.getString(R.string.add_reminder)
+        1 -> reminderLabel(context, reminders.first(), startDate, dueDate, settings)
+        else -> context.getString(R.string.n_reminders, reminders.size)
     }
 
 private fun reminderLabel(
+    context: Context,
     reminder: TaskReminderDraft,
     startDate: Long,
     dueDate: Long,
@@ -4987,50 +4982,50 @@ private fun reminderLabel(
 ): String {
     val base = when (reminder.type) {
         Alarm.TYPE_DATE_TIME -> {
-            if (reminder.time > 0) formatEditorTimestamp(reminder.time, settings) else "具体时间"
+            if (reminder.time > 0) formatEditorTimestamp(reminder.time, settings) else context.getString(R.string.specific_time)
         }
         Alarm.TYPE_REL_START -> relativeReminderLabel(
-            anchor = if (startDate > 0) "开始" else "开始日期",
+            context = context,
+            anchor = if (startDate > 0) context.getString(R.string.reminder_anchor_start) else context.getString(R.string.reminder_anchor_start_date),
             offset = reminder.time,
         )
         Alarm.TYPE_REL_END -> when {
             reminder.time == ONE_DAY_MILLIS &&
                     reminder.repeat == 6 &&
                     reminder.interval == ONE_DAY_MILLIS ->
-                if (dueDate > 0) "逾期后每天提醒" else "逾期后每天提醒"
+                context.getString(R.string.reminder_daily_after_overdue)
             else -> relativeReminderLabel(
-                anchor = if (dueDate > 0) "到期" else "截止日期",
+                context = context,
+                anchor = if (dueDate > 0) context.getString(R.string.reminder_anchor_due) else context.getString(R.string.reminder_anchor_due_date),
                 offset = reminder.time,
             )
         }
-        Alarm.TYPE_RANDOM -> "随机提醒 · 每 ${durationLabel(reminder.time)}"
-        else -> "提醒"
+        Alarm.TYPE_RANDOM -> context.getString(R.string.reminder_random_prefix, durationLabel(context, reminder.time))
+        else -> context.getString(R.string.reminder_generic)
     }
     return if (reminder.repeat > 0 && reminder.interval > 0L) {
-        "$base · 重复 ${reminder.repeat} 次，每 ${durationLabel(reminder.interval)}"
+        "$base ${context.getString(R.string.reminder_repeat_suffix, reminder.repeat, durationLabel(context, reminder.interval))}"
     } else {
         base
     }
 }
 
-private fun relativeReminderLabel(anchor: String, offset: Long): String =
+private fun relativeReminderLabel(context: Context, anchor: String, offset: Long): String =
     when {
-        offset == 0L -> "${anchor}时"
-        offset < 0L -> "${anchor}前 ${durationLabel(-offset)}"
-        else -> "${anchor}后 ${durationLabel(offset)}"
+        offset == 0L -> context.getString(R.string.at_time, anchor)
+        offset < 0L -> context.getString(R.string.before_time, anchor, durationLabel(context, -offset))
+        else -> context.getString(R.string.after_time, anchor, durationLabel(context, offset))
     }
 
-private fun durationLabel(millis: Long): String =
+private fun durationLabel(context: Context, millis: Long): String =
     when {
-        millis <= 0L -> "0 分钟"
-        millis % ONE_WEEK_MILLIS == 0L -> "${millis / ONE_WEEK_MILLIS} 周"
-        millis % ONE_DAY_MILLIS == 0L -> "${millis / ONE_DAY_MILLIS} 天"
-        millis % ONE_HOUR_MILLIS == 0L -> "${millis / ONE_HOUR_MILLIS} 小时"
-        else -> "${millis / ONE_MINUTE_MILLIS} 分钟"
+        millis <= 0L -> context.getString(R.string.zero_minutes)
+        millis % ONE_WEEK_MILLIS == 0L -> context.getString(R.string.n_weeks, (millis / ONE_WEEK_MILLIS).toInt())
+        millis % ONE_DAY_MILLIS == 0L -> context.getString(R.string.n_days, (millis / ONE_DAY_MILLIS).toInt())
+        millis % ONE_HOUR_MILLIS == 0L -> context.getString(R.string.n_hours, (millis / ONE_HOUR_MILLIS).toInt())
+        else -> context.getString(R.string.n_minutes, (millis / ONE_MINUTE_MILLIS).toInt())
     }
 
-private fun ReminderUnit.label(amount: Int): String =
-    if (amount <= 1) label else label
 
 private fun bestReminderUnit(millis: Long): ReminderUnit {
     val value = abs(millis)
@@ -5045,38 +5040,40 @@ private fun bestReminderUnit(millis: Long): ReminderUnit {
 private fun List<TaskReminderDraft>.dedupeReminders(): List<TaskReminderDraft> =
     distinctBy { listOf(it.type, it.time, it.repeat, it.interval) }
 
-private fun recurrenceLabel(value: String?): String {
+private fun recurrenceLabel(context: Context, value: String?): String {
     val draft = parseRepeatDraft(value)
     return when (draft.frequency) {
-        RepeatFrequency.NONE -> "不重复"
-        RepeatFrequency.DAILY -> draft.intervalLabel("天")
+        RepeatFrequency.NONE -> context.getString(R.string.recurrence_no_repeat)
+        RepeatFrequency.DAILY -> draft.intervalLabel(context, context.getString(R.string.day_unit))
         RepeatFrequency.WEEKLY -> buildString {
-            append(draft.intervalLabel("周"))
+            append(draft.intervalLabel(context, context.getString(R.string.week_unit)))
             if (draft.weekDays.isNotEmpty()) {
                 append(" · ")
-                append(draft.weekDays.sorted().joinToString("") { it.chineseShortName() })
+                append(draft.weekDays.sorted().joinToString("") { it.shortName(context) })
             }
         }
         RepeatFrequency.MONTHLY -> buildString {
-            append(draft.intervalLabel("月"))
+            append(draft.intervalLabel(context, context.getString(R.string.month_unit)))
             when (draft.monthlyMode) {
                 RepeatMonthlyMode.DAY_OF_MONTH -> draft.monthDay?.let {
-                    append(" · $it 日")
+                    append(" · ")
+                    append(context.getString(R.string.ordinal_nth_day, it))
                 }
                 RepeatMonthlyMode.DAY_OF_WEEK -> {
                     append(" · ")
-                    append(draft.monthOrdinal.ordinalLabel())
-                    append("周")
-                    append(draft.monthWeekday.chineseShortName())
+                    append(draft.monthOrdinal.ordinalLabel(context))
+                    append(context.getString(R.string.week_unit))
+                    append(draft.monthWeekday.shortName(context))
                 }
             }
         }
-        RepeatFrequency.YEARLY -> draft.intervalLabel("年")
+        RepeatFrequency.YEARLY -> draft.intervalLabel(context, context.getString(R.string.year_unit))
     }
 }
 
-private fun RepeatDraft.intervalLabel(unit: String): String =
-    if (interval <= 1) "每$unit" else "每 $interval $unit"
+private fun RepeatDraft.intervalLabel(context: Context, unit: String): String =
+    if (interval <= 1) context.getString(R.string.recurrence_interval_every, unit)
+    else context.getString(R.string.every_n_unit, interval, unit)
 
 private data class RepeatDraft(
     val frequency: RepeatFrequency = RepeatFrequency.NONE,
@@ -5111,6 +5108,7 @@ private enum class RepeatMonthlyMode {
 }
 
 private fun repeatValidationError(
+    context: Context,
     frequency: RepeatFrequency,
     intervalText: String,
     monthlyMode: RepeatMonthlyMode,
@@ -5122,26 +5120,26 @@ private fun repeatValidationError(
 ): String? {
     if (frequency == RepeatFrequency.NONE) return null
     val interval = intervalText.toIntOrNull()
-    if (interval == null || interval <= 0) return "重复间隔必须大于 0"
+    if (interval == null || interval <= 0) return context.getString(R.string.repeat_interval_gt_0)
     if (frequency == RepeatFrequency.MONTHLY) {
         when (monthlyMode) {
             RepeatMonthlyMode.DAY_OF_MONTH -> {
                 val day = monthDayText.toIntOrNull()
-                if (day == null || day !in 1..31) return "每月日期必须在 1 到 31 之间"
+                if (day == null || day !in 1..31) return context.getString(R.string.monthly_date_range)
             }
             RepeatMonthlyMode.DAY_OF_WEEK -> {
                 val ordinal = monthOrdinalText.toIntOrNull()
                 if (ordinal == null || ordinal == 0 || ordinal < -1 || ordinal > 5) {
-                    return "星期位置必须为 -1 或 1 到 5"
+                    return context.getString(R.string.week_position_range)
                 }
             }
         }
     }
     if (endMode == RepeatEndMode.COUNT && (countText.toIntOrNull() ?: 0) <= 0) {
-        return "重复次数必须大于 0"
+        return context.getString(R.string.repeat_count_gt_0)
     }
     if (endMode == RepeatEndMode.UNTIL && parseUntilDate(untilText) == null) {
-        return "截止日期格式应为 yyyy-MM-dd"
+        return context.getString(R.string.due_date_format)
     }
     return null
 }
@@ -5266,8 +5264,8 @@ private fun Int.coerceMonthlyOrdinal(): Int =
         else -> this
     }
 
-private fun Int.ordinalLabel(): String =
-    if (this < 0) "最后一个" else "第 ${coerceMonthlyOrdinal()} 个"
+private fun Int.ordinalLabel(context: Context): String =
+    if (this < 0) context.getString(R.string.ordinal_last) else context.getString(R.string.ordinal_nth, coerceMonthlyOrdinal())
 
 private fun parseWeekday(value: String): DayOfWeek? =
     when (value.uppercase(Locale.US)) {
@@ -5292,15 +5290,15 @@ private fun DayOfWeek.rruleName(): String =
         DayOfWeek.SUNDAY -> "SU"
     }
 
-private fun DayOfWeek.chineseShortName(): String =
+private fun DayOfWeek.shortName(context: Context): String =
     when (this) {
-        DayOfWeek.MONDAY -> "一"
-        DayOfWeek.TUESDAY -> "二"
-        DayOfWeek.WEDNESDAY -> "三"
-        DayOfWeek.THURSDAY -> "四"
-        DayOfWeek.FRIDAY -> "五"
-        DayOfWeek.SATURDAY -> "六"
-        DayOfWeek.SUNDAY -> "日"
+        DayOfWeek.MONDAY -> context.getString(R.string.mon_short)
+        DayOfWeek.TUESDAY -> context.getString(R.string.tue_short)
+        DayOfWeek.WEDNESDAY -> context.getString(R.string.wed_short)
+        DayOfWeek.THURSDAY -> context.getString(R.string.thu_short)
+        DayOfWeek.FRIDAY -> context.getString(R.string.fri_short)
+        DayOfWeek.SATURDAY -> context.getString(R.string.sat_short)
+        DayOfWeek.SUNDAY -> context.getString(R.string.sun_short)
     }
 
 private fun LocalDate.endOfDayMillis(): Long =
@@ -5588,5 +5586,5 @@ private fun Context.hasPersistedReadPermission(uri: String): Boolean {
 }
 
 private fun Context.toastAttachmentOpenFailed() {
-    Toast.makeText(this, "无法打开附件，文件权限可能已失效", Toast.LENGTH_SHORT).show()
+    Toast.makeText(this, getString(R.string.toast_attach_perm_failed), Toast.LENGTH_SHORT).show()
 }

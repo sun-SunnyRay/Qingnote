@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -24,10 +27,7 @@ import com.qingguang.qingnote.ui.page.input.MemoInputPage
 import com.qingguang.qingnote.ui.page.input.MemoPreviewPage
 import com.qingguang.qingnote.ui.page.main.MainScreen
 import com.qingguang.qingnote.ui.page.search.SearchPage
-import com.qingguang.qingnote.ui.page.settings.DonatePage
 import com.qingguang.qingnote.ui.page.settings.ExplorePage
-import com.qingguang.qingnote.ui.page.settings.GalleryPage
-import com.qingguang.qingnote.ui.page.settings.MoreInfoPage
 import com.qingguang.qingnote.ui.page.settings.TaskSettingsPage
 import com.qingguang.qingnote.ui.page.settings.NotificationGuardPage
 import com.qingguang.qingnote.ui.page.share.SharePage
@@ -93,12 +93,22 @@ fun App() {
     }
 
 
+    val materialColorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -> darkColorScheme()
+        else -> lightColorScheme()
+    }
+
     CompositionLocalProvider(LocalRootNavController provides navController) {
-        SaltTheme(
-            colors = colors,
-            configs = saltConfigs(isDarkTheme = darkTheme),
-        ) {
-            NavHostContainer(navController = navController)
+        MaterialTheme(colorScheme = materialColorScheme) {
+            SaltTheme(
+                colors = colors,
+                configs = saltConfigs(isDarkTheme = darkTheme),
+            ) {
+                NavHostContainer(navController = navController)
+            }
         }
     }
 }
@@ -114,9 +124,6 @@ fun NavHostContainer(
         navController,
         startDestination = Screen.Main,
     ) {
-        composable<Screen.Explore> {
-            ExplorePage(navHostController = navController)
-        }
         composable<Screen.TagList> {
             TagListPage(navController = navController)
         }
@@ -128,19 +135,12 @@ fun NavHostContainer(
         composable<Screen.RandomWalk> {
             ExplorePage(navHostController = navController)
         }
-        composable<Screen.Gallery> {
-            GalleryPage(navHostController = navController)
-        }
         composable<Screen.Search> {
             SearchPage(navController = navController)
         }
         composable<Screen.DataManager> {
             DataManagerPage(navController = navController)
         }
-        composable<Screen.MoreInfo> {
-            MoreInfoPage(navController = navController)
-        }
-
         composable<Screen.TagDetail> { navBackStackEntry ->
             val args = navBackStackEntry.toRoute<Screen.TagDetail>()
             TagDetailPage(tag = args.tag, navController = navController)
@@ -179,10 +179,6 @@ fun NavHostContainer(
         composable<Screen.Share> { navBackStackEntry ->
             val args = navBackStackEntry.toRoute<Screen.Share>()
             SharePage(args.id, navController)
-        }
-
-        composable<Screen.DonatePage> {
-            DonatePage(navController = navController)
         }
 
         composable<Screen.TaskSettings> {

@@ -5,10 +5,7 @@ import org.tasks.Logger
 import com.todoroo.astrid.timers.TimerPlugin
 import org.tasks.broadcast.RefreshBroadcaster
 import org.tasks.data.dao.TaskDao
-import org.tasks.data.db.SuspendDbUtils.eachChunk
 import org.tasks.data.entity.Task
-import org.tasks.filters.Filter
-import org.tasks.preferences.QueryPreferences
 import org.tasks.jobs.BackgroundWork
 import org.tasks.location.LocationService
 import org.tasks.notifications.CancelReason
@@ -57,25 +54,5 @@ class TaskSaver(
         }
         notifier.triggerNotifications()
         backgroundWork.scheduleRefresh()
-    }
-
-    suspend fun touch(ids: List<Long>) {
-        ids.eachChunk { taskDao.touch(it) }
-        syncAdapters.sync(SyncSource.TASK_CHANGE)
-    }
-
-    suspend fun setCollapsed(id: Long, collapsed: Boolean) {
-        taskDao.setCollapsed(listOf(id), collapsed)
-        syncAdapters.sync(SyncSource.TASK_CHANGE)
-        refreshBroadcaster.broadcastRefresh()
-    }
-
-    suspend fun setCollapsed(preferences: QueryPreferences, filter: Filter, collapsed: Boolean) {
-        taskDao.fetchTasks(TaskListQuery.getQuery(preferences, filter))
-            .filter(TaskContainer::hasChildren)
-            .map(TaskContainer::id)
-            .eachChunk { taskDao.setCollapsed(it, collapsed) }
-        syncAdapters.sync(SyncSource.TASK_CHANGE)
-        refreshBroadcaster.broadcastRefresh()
     }
 }

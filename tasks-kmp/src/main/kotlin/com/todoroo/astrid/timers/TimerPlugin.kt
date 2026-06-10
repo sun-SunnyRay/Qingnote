@@ -14,10 +14,6 @@ class TimerPlugin(
     private val notifier: Notifier,
     private val taskDao: TaskDao,
 ) {
-    suspend fun startTimer(task: Task) {
-        updateTimer(task, true)
-    }
-
     suspend fun stopTimer(task: Task) {
         updateTimer(task, false)
     }

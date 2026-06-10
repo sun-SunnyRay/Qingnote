@@ -61,7 +61,7 @@ class DataManagerViewModel @Inject constructor(
     fun generateBackupFileName(): String {
         val dateFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHH")
         val currentTime = java.time.LocalDateTime.now()
-        return "IdeaMemoHtml${dateFormatter.format(currentTime)}.zip"
+        return "QingNoteHtml${dateFormatter.format(currentTime)}.zip"
     }
 
     private suspend fun generateZipFile(

@@ -8,9 +8,9 @@ object Constant {
 
     val USER_AGREEMENT = "https://www.freeprivacypolicy.com/live/77fb28fd-1c21-4a6c-8c8b-1464c314d629"
     val PRIVACY_POLICY = "https://www.freeprivacypolicy.com/live/07870fcd-c545-4b1c-9490-4d6de2d8bb5c"
-    val GITHUB_RELEASE = "https://github.com/ldlywt/IdeaMemo/releases"
-    val GITHUB_URL = "https://github.com/ldlywt/IdeaMemo"
-    val GITHUB_FEEDBACK_URL = "https://github.com/ldlywt/IdeaMemo/issues/2"
+    val GITHUB_RELEASE = "https://github.com/ldlywt/QingNote/releases"
+    val GITHUB_URL = "https://github.com/ldlywt/QingNote"
+    val GITHUB_FEEDBACK_URL = "https://github.com/ldlywt/QingNote/issues/2"
 
     const val JIANGUOYUN_URL = "https://dav.jianguoyun.com/dav/"
 

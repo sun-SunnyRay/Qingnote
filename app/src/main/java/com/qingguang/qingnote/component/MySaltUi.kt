@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.qingguang.qingnote.R
-import com.qingguang.qingnote.utils.Tools
 import com.qingguang.qingnote.utils.str
 import com.moriafly.salt.ui.ItemOutSpacer
 import com.moriafly.salt.ui.SaltTheme
@@ -150,7 +149,7 @@ fun ItemPopup(  //TODO 根据文字长度自动调整宽度
                 state.dismiss()
             },
             offset = DpOffset(
-                Tools().calPopupLocation(
+                calPopupLocation(
                     context.resources.displayMetrics.density,
                     clickOffsetX.floatValue,
                     popupWidth,
@@ -200,5 +199,21 @@ fun ConfirmDialog(
             text = confirmText
         )
         ItemOutSpacer()
+    }
+}
+
+fun calPopupLocation(
+    density: Float,
+    clickOffsetX: Float,
+    popupWidth: Int,
+    screenWidthDp: Int
+): Float {
+    val temp = (clickOffsetX / (density + 0.245f))
+    return if (temp < 42 + popupWidth / 2) {
+        16f
+    } else if (temp > (screenWidthDp - popupWidth)) {
+        (screenWidthDp - popupWidth - 42).toFloat()
+    } else {
+        temp - popupWidth + 84
     }
 }

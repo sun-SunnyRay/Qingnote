@@ -49,7 +49,7 @@ object BackUp {
     suspend fun exportTXTFile(list: List<NoteShowBean>, uri: Uri) = withContext(Dispatchers.IO) {
         val context = App.instance
         val root = DocumentFile.fromTreeUri(context, uri) ?: return@withContext
-        val ideaMemoDir = root.findFile("IdeaMemo") ?: root.createDirectory("IdeaMemo") ?: root
+        val ideaMemoDir = root.findFile("QingNote") ?: root.createDirectory("QingNote") ?: root
 
         list.forEach { noteShowBean ->
             val title = noteShowBean.note.noteTitle
@@ -128,7 +128,7 @@ object BackUp {
             try {
                 // 1. 生成 HTML 内容
                 val htmlContent = generateHtml(list)
-                val htmlEntry = ZipEntry("IdeaMemo.html")
+                val htmlEntry = ZipEntry("QingNote.html")
                 zipOut.putNextEntry(htmlEntry)
                 zipOut.write(htmlContent.toByteArray())
                 zipOut.closeEntry()
@@ -221,7 +221,7 @@ object BackUp {
     <html>
       <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <title>IdeaMemo · 笔记导出</title>
+        <title>QingNote · 笔记导出</title>
         <style type="text/css">
           * { margin: 0; padding: 0; }
           body { background: #fafafa; }

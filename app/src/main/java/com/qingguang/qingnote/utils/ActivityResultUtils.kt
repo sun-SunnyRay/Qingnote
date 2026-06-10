@@ -35,7 +35,7 @@ object ExportHtmlContract : ActivityResultContract<None?, Uri?>() {
         return Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/zip"
-            putExtra(Intent.EXTRA_TITLE, "IdeaMemoHtml.zip")
+            putExtra(Intent.EXTRA_TITLE, "QingNoteHtml.zip")
         }
     }
 

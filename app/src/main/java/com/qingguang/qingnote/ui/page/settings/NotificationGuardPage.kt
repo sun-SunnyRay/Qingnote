@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -218,7 +219,7 @@ fun NotificationGuardPage(navController: NavHostController) {
     if (showGuideDialog) {
         AlertDialog(
             onDismissRequest = { showGuideDialog = false },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
             title = { Text("后台提醒防杀配置指南") },
             text = {

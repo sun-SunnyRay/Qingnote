@@ -18,6 +18,7 @@ import org.tasks.data.dao.TaskDao
 import org.tasks.data.entity.Task
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.qingguang.qingnote.R
 import com.qingguang.qingnote.tasks.receiver.TaskAlarmReceiver
 
 @Singleton
@@ -92,10 +93,10 @@ class TaskAlarmScheduler @Inject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "任务提醒",
+                context.getString(R.string.task_reminder_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "QingNote 任务到期提醒通知"
+                description = context.getString(R.string.task_reminder_channel_desc)
                 enableVibration(true)
             }
             notificationManager.createNotificationChannel(channel)
@@ -121,7 +122,7 @@ class TaskAlarmScheduler @Inject constructor(
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("${priorityStr}${task.title}")
-            .setContentText(task.notes ?: "任务到期提醒")
+            .setContentText(task.notes ?: context.getString(R.string.task_due_reminder))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pendingIntent)

@@ -89,14 +89,6 @@ Special thanks to:
 - **ldlywt** - Creator of IdeaMemo, the original note-taking app that QingNote is built upon
 - **Alex Baker** - Creator of Tasks.org, whose task management architecture and design inspired QingNote's task features
 
-Some of the project's code is derived from excellent open-source projects:
-
-- [ReadYou](https://github.com/Ashinch/ReadYou)
-- [MoeMemosAndroid](https://github.com/mudkipme/MoeMemosAndroid)
-- [Animius](https://github.com/lanlinju/Animius)
-- [SaltUI](https://github.com/Moriafly/SaltUI)
-- [memos](https://github.com/usememos/memos)
-
 ## 🧾 License
 GNU GPL v3.0 © [QingNote](https://github.com/sun-SunnyRay/Qingnote/blob/main/LICENSE)
 

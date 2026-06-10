@@ -89,23 +89,12 @@
 - **ldlywt** - IdeaMemo 的创建者，QingNote 所构建的原始笔记应用
 - **Alex Baker** - Tasks.org 的创建者，其任务管理架构和设计启发了 QingNote 的任务功能
 
-项目部分代码源自优秀的开源项目：
-
-- [ReadYou](https://github.com/Ashinch/ReadYou)
-- [MoeMemosAndroid](https://github.com/mudkipme/MoeMemosAndroid)
-- [Animius](https://github.com/lanlinju/Animius)
-- [SaltUI](https://github.com/Moriafly/SaltUI)
-- [memos](https://github.com/usememos/memos)
-
 ## 🧾 许可证
 GNU GPL v3.0 © [QingNote](https://github.com/sun-SunnyRay/Qingnote/blob/main/LICENSE)
 
 您的 star 是我最大的动力！ **🌟**
 
 > 开发不易，头发渐稀。如果这个项目对你有帮助，请给个 star 吧！你的每一个 star 都是对开发者最大的鼓励，让我有动力继续熬夜写代码（不是）。
-
-## ☕️ 捐助
-可以给我买一杯咖啡，让我更有动力继续开发。
 
 ## ⭐ Star History
 

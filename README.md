@@ -18,21 +18,60 @@
 - **Free to use** : Enjoy all features completely free of charge with no content fees.
 
 ### Task Features
-- **Task Management** : Create, edit, and organize tasks with priorities, due dates, and start dates.
-- **Repeat Tasks** : Support daily, weekly, monthly, and custom repeat schedules.
-- **Reminders** : Set multiple reminders per task with flexible timing options.
-- **Subtasks** : Break down complex tasks into manageable subtasks.
-- **Attachments** : Attach files to your tasks for reference.
-- **Calendar Integration** : Sync tasks with system calendar.
-- **Grouping & Sorting** : Group tasks by due date, priority, start date, or list.
-- **Internationalization** : Support for English, Simplified Chinese, and Traditional Chinese.
 
-## ✈️ Download
+**QingNote** 的任务管理系统是一个功能完整的 GTD 工具，帮助你高效管理待办事项。
 
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=com.qingguang.qingnote)
-[<img src="https://s1.ax1x.com/2023/01/12/pSu1a36.png" alt="Get it on GitHub" height="80">](https://github.com/sun-SunnyRay/Qingnote/releases/latest)
+#### 基础任务管理
+- **创建任务**：快速创建任务，支持设置标题、描述、优先级（高/中/低）、开始日期和截止日期
+- **任务编辑**：点击任务即可编辑所有属性，支持滑动操作完成/删除
+- **批量操作**：长按选中多个任务，支持批量移动、设置日期、优先级和标签
+
+#### 重复任务系统
+- **内置重复周期**：每天、每周、每月，一键设置
+- **自定义重复**：支持复杂的重复规则，如：
+  - 每隔 N 天/周/月/年
+  - 每周的特定几天（如周一、周三、周五）
+  - 每月的第 N 天或第 N 个星期几
+  - 设置结束日期或重复次数
+
+#### 提醒系统
+- **多提醒支持**：每个任务可设置多个提醒
+- **灵活时间选项**：
+  - 开始时提醒
+  - 开始前 10 分钟/1 小时/1 天
+  - 到期时提醒
+  - 到期前 10 分钟/1 小时/1 天
+  - 逾期后每天提醒
+  - 自定义具体时间
+- **随机提醒**：在指定时间范围内随机触发，避免习惯性忽视
+
+#### 子任务
+- **任务分解**：将复杂任务拆分为可管理的子任务
+- **进度跟踪**：显示子任务完成进度（如 3/5 已完成）
+- **独立管理**：子任务可独立添加、删除、排序
+
+#### 附件管理
+- **文件附件**：为任务添加任意文件作为附件
+- **快速访问**：点击附件即可打开文件
+- **批量管理**：支持添加、删除多个附件
+
+#### 日历集成
+- **系统日历同步**：将任务同步到 Android 系统日历
+- **日历事件**：自动创建日历事件，包含任务详情
+- **双向同步**：在日历中修改也能同步回应用
+
+#### 分组与排序
+- **多种分组模式**：
+  - 按截止日期：逾期、今天、稍后、无截止日期
+  - 按优先级：高、中、低、无
+  - 按开始日期：已开始、今天、未开始、无开始日期
+  - 按清单：按标签分组
+  - 不分组
+- **智能排序**：在每个分组内按优先级、日期等排序
+
+#### 国际化
+- 支持英文、简体中文和繁体中文
+- 所有界面元素均已本地化
 
 ## 🤝 How to Contribute
 - **Feel free to contribute code**, but please don't mention simple fix code!
@@ -41,9 +80,6 @@
 - **Report bugs.** Encountered a crash or something went wrong? Create a new *Issue* with as much
   detail as possible to help resolve it.
 - **Enjoy the app.** The best contribution is simply using and enjoying the app I spent so much time on!
-
-## 🌍 Translation
-Multi-language translation is done by AI, there may be errors, please point them out. Thanks!
 
 ## 🤗 Thanks
 

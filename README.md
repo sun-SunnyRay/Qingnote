@@ -19,59 +19,59 @@
 
 ### Task Features
 
-**QingNote** 的任务管理系统是一个功能完整的 GTD 工具，帮助你高效管理待办事项。
+**QingNote**'s task management system is a full-featured GTD tool to help you efficiently manage your to-dos.
 
-#### 基础任务管理
-- **创建任务**：快速创建任务，支持设置标题、描述、优先级（高/中/低）、开始日期和截止日期
-- **任务编辑**：点击任务即可编辑所有属性，支持滑动操作完成/删除
-- **批量操作**：长按选中多个任务，支持批量移动、设置日期、优先级和标签
+#### Basic Task Management
+- **Create Tasks** : Quickly create tasks with title, description, priority (High/Medium/Low), start date and due date
+- **Edit Tasks** : Tap a task to edit all properties, swipe to complete/delete
+- **Batch Operations** : Long-press to select multiple tasks, batch move, set dates, priorities and tags
 
-#### 重复任务系统
-- **内置重复周期**：每天、每周、每月，一键设置
-- **自定义重复**：支持复杂的重复规则，如：
-  - 每隔 N 天/周/月/年
-  - 每周的特定几天（如周一、周三、周五）
-  - 每月的第 N 天或第 N 个星期几
-  - 设置结束日期或重复次数
+#### Repeat Task System
+- **Built-in Repeat Cycles** : Daily, weekly, monthly, one-tap setup
+- **Custom Repeats** : Support complex repeat rules such as:
+  - Every N days/weeks/months/years
+  - Specific days of the week (e.g., Mon, Wed, Fri)
+  - Nth day or Nth weekday of each month
+  - Set end date or occurrence count
 
-#### 提醒系统
-- **多提醒支持**：每个任务可设置多个提醒
-- **灵活时间选项**：
-  - 开始时提醒
-  - 开始前 10 分钟/1 小时/1 天
-  - 到期时提醒
-  - 到期前 10 分钟/1 小时/1 天
-  - 逾期后每天提醒
-  - 自定义具体时间
-- **随机提醒**：在指定时间范围内随机触发，避免习惯性忽视
+#### Reminder System
+- **Multiple Reminders** : Set multiple reminders per task
+- **Flexible Time Options** :
+  - At start time
+  - 10 min / 1 hour / 1 day before start
+  - At due time
+  - 10 min / 1 hour / 1 day before due
+  - Daily after overdue
+  - Custom specific time
+- **Random Reminders** : Trigger randomly within a specified time range to avoid habitual neglect
 
-#### 子任务
-- **任务分解**：将复杂任务拆分为可管理的子任务
-- **进度跟踪**：显示子任务完成进度（如 3/5 已完成）
-- **独立管理**：子任务可独立添加、删除、排序
+#### Subtasks
+- **Task Decomposition** : Break down complex tasks into manageable subtasks
+- **Progress Tracking** : Display subtask completion progress (e.g., 3/5 completed)
+- **Independent Management** : Subtasks can be independently added, deleted, and reordered
 
-#### 附件管理
-- **文件附件**：为任务添加任意文件作为附件
-- **快速访问**：点击附件即可打开文件
-- **批量管理**：支持添加、删除多个附件
+#### Attachment Management
+- **File Attachments** : Attach any file to tasks for reference
+- **Quick Access** : Tap attachment to open the file
+- **Batch Management** : Add and delete multiple attachments
 
-#### 日历集成
-- **系统日历同步**：将任务同步到 Android 系统日历
-- **日历事件**：自动创建日历事件，包含任务详情
-- **双向同步**：在日历中修改也能同步回应用
+#### Calendar Integration
+- **System Calendar Sync** : Sync tasks to Android system calendar
+- **Calendar Events** : Auto-create calendar events with task details
+- **Two-way Sync** : Changes in calendar also sync back to the app
 
-#### 分组与排序
-- **多种分组模式**：
-  - 按截止日期：逾期、今天、稍后、无截止日期
-  - 按优先级：高、中、低、无
-  - 按开始日期：已开始、今天、未开始、无开始日期
-  - 按清单：按标签分组
-  - 不分组
-- **智能排序**：在每个分组内按优先级、日期等排序
+#### Grouping & Sorting
+- **Multiple Grouping Modes** :
+  - By due date: Overdue, Today, Later, No due date
+  - By priority: High, Medium, Low, None
+  - By start date: Started, Today, Not started, No start date
+  - By list: Group by tags
+  - No grouping
+- **Smart Sorting** : Sort by priority, date, etc. within each group
 
-#### 国际化
-- 支持英文、简体中文和繁体中文
-- 所有界面元素均已本地化
+#### Internationalization
+- Support English, Simplified Chinese, and Traditional Chinese
+- All UI elements are fully localized
 
 ## 🤝 How to Contribute
 - **Feel free to contribute code**, but please don't mention simple fix code!
@@ -102,7 +102,7 @@ GNU GPL v3.0 © [QingNote](https://github.com/sun-SunnyRay/Qingnote/blob/main/LI
 
 Your star is my biggest motivation! **🌟**
 
-> 开发不易，头发渐稀。如果这个项目对你有帮助，请给个 star 吧！你的每一个 star 都是对开发者最大的鼓励，让我有动力继续熬夜写代码（不是）。
+> Development is not easy, and my hair is getting thinner. If this project helps you, please give it a star! Every star is the biggest encouragement for the developer, motivating me to keep burning the midnight oil (just kidding).
 
 ## ⭐ Star History
 

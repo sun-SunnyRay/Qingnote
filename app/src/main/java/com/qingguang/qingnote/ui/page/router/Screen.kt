@@ -1,0 +1,56 @@
+package com.qingguang.qingnote.ui.page.router
+
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+sealed class Screen {
+
+    @Serializable
+    data object Main : Screen()
+
+    @Serializable
+    data class InputDetail(val id: Long) : Screen()
+
+    @Serializable
+    data class MemoPreview(val id: Long) : Screen()
+
+    @Serializable
+    object TagList : Screen()
+
+    @Serializable
+    data class TagDetail(val tag: String) : Screen()
+
+    @Serializable
+    data class YearDetail(val year: String) : Screen()
+
+    @Serializable
+    data class DateRangePage(val startTime: Long, val endTime: Long) : Screen()
+
+    @Serializable
+    data class LocationDetail(val location: String) : Screen()
+
+    @Serializable
+    object Search : Screen()
+
+    @Serializable
+    data class Share(val id: Long) : Screen()
+
+    @Serializable
+    object DataManager : Screen()
+
+    @Serializable
+    object RandomWalk : Screen()
+
+    @Serializable
+    data class PictureDisplay(val pathList: List<String>, val curIndex: Int, val timestamps: List<Long>) : Screen()
+
+    @Serializable
+    object TaskSettings : Screen()
+    
+    @Serializable
+    object NotificationGuard : Screen()
+
+    @Serializable
+    data class CommentList(val parentNoteId: Long) : Screen()
+}

@@ -1,0 +1,24 @@
+<resources>
+
+    <style name="Theme.Note" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="windowActionModeOverlay">true</item>
+        <!-- Use edge to edge -->
+        <!--<item name="android:windowLightStatusBar">true</item>-->
+        <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+
+        <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an
+             animated drawable. One of these is required. -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_start</item>
+        <!-- Required for animated icons -->
+        <item name="windowSplashScreenAnimationDuration">100</item>
+
+        <!-- Set the theme of the Activity that directly follows your splash screen. -->
+        <!-- Required -->
+        <item name="postSplashScreenTheme">@style/Theme.Note</item>
+    </style>
+
+</resources>

@@ -1,0 +1,47 @@
+package org.tasks.data.entity
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+import org.tasks.data.db.Table
+
+@Serializable
+@Parcelize
+@Entity(
+    tableName = Geofence.TABLE_NAME,
+    foreignKeys = [
+        ForeignKey(
+            entity = Task::class,
+            parentColumns = ["_id"],
+            childColumns = ["task"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ]
+)
+data class Geofence(
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "geofence_id")
+    @Transient
+    val id: Long = 0,
+    @ColumnInfo(name = "task", index = true)
+    @Transient
+    val task: Long = 0,
+    @ColumnInfo(name = "place")
+    val place: String? = null,
+    @ColumnInfo(name = "arrival")
+    val isArrival: Boolean = false,
+    @ColumnInfo(name = "departure")
+    var isDeparture: Boolean = false,
+) : Parcelable {
+    companion object {
+        const val TABLE_NAME = "geofences"
+        val TABLE = Table(TABLE_NAME)
+        val TASK = TABLE.column("task")
+        val PLACE = TABLE.column("place")
+    }
+}

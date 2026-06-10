@@ -1,0 +1,310 @@
+package org.tasks.filters
+
+import org.tasks.compose.drawer.DrawerConfiguration
+import org.tasks.data.LocationFilters
+import org.tasks.data.NO_ORDER
+import org.tasks.data.TagFilters
+import org.tasks.data.dao.CaldavDao
+import org.tasks.data.dao.FilterDao
+import org.tasks.data.dao.LocationDao
+import org.tasks.data.dao.TagDataDao
+import org.tasks.data.dao.TaskDao
+import org.tasks.data.composeIcon
+import org.tasks.data.openTaskApp
+import org.tasks.data.entity.CaldavAccount
+import org.tasks.data.entity.CaldavAccount.Companion.TYPE_LOCAL
+import org.tasks.data.entity.CaldavAccount.Companion.TYPE_OPENTASKS
+import org.tasks.data.toLocationFilter
+import org.tasks.data.toTagFilter
+import org.tasks.filters.NavigationDrawerSubheader.SubheaderType
+import org.tasks.TasksBuildConfig
+import org.tasks.themes.TasksIcons
+import org.tasks.preferences.TasksPreferences
+import org.tasks.preferences.TasksPreferences.Companion.showDebugFilters
+import org.tasks.preferences.TasksPreferences.Companion.collapseDebug
+import org.tasks.preferences.TasksPreferences.Companion.collapseFilters
+import org.tasks.preferences.TasksPreferences.Companion.collapsePlaces
+import org.tasks.preferences.TasksPreferences.Companion.collapseTags
+
+class FilterProvider(
+    private val filterDao: FilterDao,
+    private val tagDataDao: TagDataDao,
+    private val caldavDao: CaldavDao,
+    private val configuration: DrawerConfiguration,
+    private val locationDao: LocationDao,
+    private val taskDao: TaskDao,
+    private val tasksPreferences: TasksPreferences,
+) {
+    suspend fun listPickerItems(): List<FilterListItem> =
+            caldavFilters(showCreate = false, forceExpand = false)
+
+    suspend fun drawerItems(): List<FilterListItem> =
+        getAllFilters(showCreate = true, hideUnused = true)
+
+    suspend fun allLists(): List<Filter> =
+        caldavFilters(showCreate = false, forceExpand = true)
+            .filterIsInstance<Filter>()
+
+    suspend fun allFilters(): List<Filter> =
+        getAllFilters(showCreate = false, hideUnused = false, forceExpand = true)
+            .filterIsInstance<Filter>()
+
+    suspend fun filterPickerItems(): List<FilterListItem> =
+            getAllFilters(showCreate = false)
+
+    suspend fun wearableFilters(): List<FilterListItem> =
+            getAllFilters(showCreate = false, forceExpand = true, hideUnused = true)
+
+    suspend fun drawerCustomizationItems(): List<FilterListItem> =
+            getAllFilters(showBuiltIn = false, showCreate = true)
+
+    private suspend fun getDebugFilters(): List<FilterListItem> =
+            if (TasksBuildConfig.DEBUG && tasksPreferences.get(showDebugFilters, false)) {
+                val collapsed = tasksPreferences.get(collapseDebug, false)
+                val filters = listOf(
+                    DebugFilters.getNoListFilter(),
+                    DebugFilters.getNoTitleFilter(),
+                    DebugFilters.getMissingListFilter(),
+                    DebugFilters.getMissingAccountFilter(),
+                    DebugFilters.getNoCreateDateFilter(),
+                    DebugFilters.getNoModificationDateFilter(),
+                    DebugFilters.getDeleted()
+                )
+                listOf(
+                    NavigationDrawerSubheader(
+                        "Debug",
+                        false,
+                        collapsed,
+                        SubheaderType.PREFERENCE,
+                        collapseDebug.name,
+                        childCount = filters.size,
+                    )
+                )
+                        .apply { if (collapsed) return this }
+                        .plus(filters)
+
+            } else {
+                emptyList()
+            }
+
+    private suspend fun addFilters(
+        showCreate: Boolean,
+        showBuiltIn: Boolean,
+        forceExpand: Boolean,
+    ): List<FilterListItem> =
+            if (!configuration.filtersEnabled) {
+                emptyList()
+            } else {
+                val collapsed = !forceExpand && tasksPreferences.get(collapseFilters, false)
+                val children = buildList<Filter> {
+                    if (showBuiltIn) addAll(builtInFilters())
+                    addAll(filterDao.getFilters().map(::CustomFilter).sort())
+                }
+                listOf(
+                    NavigationDrawerSubheader(
+                        "drawer_filters",
+                        false,
+                        collapsed,
+                        SubheaderType.PREFERENCE,
+                        collapseFilters.name,
+                        if (showCreate) REQUEST_NEW_FILTER else 0,
+                        icon = TasksIcons.FILTER_LIST,
+                        childCount = children.size,
+                    )
+                )
+                        .apply { if (collapsed) return this }
+                        .plus(children)
+            }
+
+    private suspend fun addTags(
+        showCreate: Boolean,
+        hideUnused: Boolean,
+        forceExpand: Boolean,
+    ): List<FilterListItem> =
+            if (!configuration.tagsEnabled) {
+                emptyList()
+            } else {
+                val collapsed = !forceExpand && tasksPreferences.get(collapseTags, false)
+                val children = tagDataDao.getTagFilters()
+                    .filterIf(hideUnused && configuration.hideUnusedTags) {
+                        it.count > 0
+                    }
+                    .map(TagFilters::toTagFilter)
+                    .sort()
+                listOf(
+                    NavigationDrawerSubheader(
+                        "drawer_tags",
+                        false,
+                        collapsed,
+                        SubheaderType.PREFERENCE,
+                        collapseTags.name,
+                        if (showCreate) REQUEST_NEW_TAGS else 0,
+                        icon = TasksIcons.LABEL,
+                        childCount = children.size,
+                    )
+                )
+                        .apply { if (collapsed) return this }
+                        .plus(children)
+            }
+
+    private suspend fun addPlaces(
+        showCreate: Boolean,
+        hideUnused: Boolean,
+        forceExpand: Boolean,
+    ): List<FilterListItem> =
+            if (!configuration.placesEnabled) {
+                emptyList()
+            } else {
+                val collapsed = !forceExpand && tasksPreferences.get(collapsePlaces, false)
+                val children = locationDao.getPlaceFilters()
+                    .filterIf(hideUnused && configuration.hideUnusedPlaces) {
+                        it.count > 0
+                    }
+                    .map(LocationFilters::toLocationFilter)
+                    .sort()
+                listOf(
+                    NavigationDrawerSubheader(
+                        "drawer_places",
+                        false,
+                        collapsed,
+                        SubheaderType.PREFERENCE,
+                        collapsePlaces.name,
+                        if (showCreate) REQUEST_NEW_PLACE else 0,
+                        icon = TasksIcons.PLACE,
+                        childCount = children.size,
+                    )
+                )
+                        .apply { if (collapsed) return this }
+                        .plus(children)
+            }
+
+    private suspend fun getAllFilters(
+        showCreate: Boolean = true,
+        showBuiltIn: Boolean = true,
+        hideUnused: Boolean = false,
+        forceExpand: Boolean = false,
+    ): List<FilterListItem> =
+            if (showBuiltIn) {
+                arrayListOf(MyTasksFilter.create())
+            } else {
+                ArrayList<FilterListItem>()
+            }
+                    .asSequence()
+                    .plus(addFilters(showCreate, showBuiltIn, forceExpand))
+                    .plus(addTags(showCreate, hideUnused, forceExpand))
+                    .plus(addPlaces(showCreate, hideUnused, forceExpand))
+                    .plus(caldavFilters(showCreate, forceExpand))
+                    .toList()
+                    .plusAllIf(TasksBuildConfig.DEBUG) { getDebugFilters() }
+
+    private suspend fun caldavFilters(
+        showCreate: Boolean,
+        forceExpand: Boolean,
+    ): List<FilterListItem> =
+            caldavDao
+                .getAccounts()
+                .flatMap {
+                    caldavFilter(
+                        it,
+                        showCreate,
+                        forceExpand,
+                    )
+                }
+
+    private suspend fun caldavFilter(
+        account: CaldavAccount,
+        showCreate: Boolean,
+        forceExpand: Boolean,
+    ): List<FilterListItem> {
+        val collapsed = !forceExpand && account.isCollapsed
+        val children = caldavDao
+            .getCaldavFilters(account.uuid!!)
+            .map {
+                CaldavFilter(
+                    calendar = it.caldavCalendar,
+                    account = account,
+                    principals = it.principals,
+                    count = it.count,
+                )
+            }
+            .sort()
+        val openTaskApp = if (account.accountType == TYPE_OPENTASKS) {
+            account.openTaskApp
+        } else {
+            null
+        }
+        return listOf(
+            NavigationDrawerSubheader(
+                if (account.accountType == TYPE_LOCAL) {
+                    account.name?.takeIf { it.isNotBlank() } ?: "drawer_local_lists"
+                } else {
+                    account.name
+                },
+                account.error?.isNotBlank() ?: false,
+                collapsed,
+                when {
+                    account.isTasksOrg -> SubheaderType.TASKS
+                    else -> SubheaderType.CALDAV
+                },
+                account.id.toString(),
+                if (showCreate) REQUEST_NEW_LIST else 0,
+                accountIcon = account.composeIcon,
+                childCount = children.size,
+                openTaskApp = openTaskApp,
+            )
+        )
+            .apply { if (collapsed) return this }
+            .plus(children)
+    }
+
+    private suspend fun builtInFilters(): List<Filter> {
+        val filters: MutableList<Filter> = ArrayList()
+        if (configuration.todayFilter) {
+            filters.add(TodayFilter.create())
+        }
+        if (configuration.recentlyModifiedFilter) {
+            filters.add(RecentlyModifiedFilter.create())
+        }
+        if (taskDao.snoozedReminders() > 0) {
+            filters.add(SnoozedFilter.create())
+        }
+        if (taskDao.activeTimers() > 0) {
+            filters.add(TimerFilter.create())
+        }
+        if (taskDao.hasNotifications() > 0) {
+            filters.add(NotificationsFilter.create())
+        }
+        return filters
+    }
+
+    companion object {
+        const val REQUEST_NEW_LIST = 10100
+        const val REQUEST_NEW_TAGS = 10101
+        const val REQUEST_NEW_PLACE = 10104
+        const val REQUEST_NEW_FILTER = 101015
+        private val COMPARATOR = Comparator<Filter> { f1, f2 ->
+            when {
+                f1.order == NO_ORDER && f2.order == NO_ORDER ->
+                    AlphanumComparator.FILTER.compare(f1, f2)
+                f1.order == NO_ORDER -> 1
+                f2.order == NO_ORDER -> -1
+                f1.order < f2.order -> -1
+                f1.order > f2.order -> 1
+                else -> AlphanumComparator.FILTER.compare(f1, f2)
+            }
+        }
+
+        private fun List<Filter>.sort(): List<Filter> =
+                if (all { it.order == NO_ORDER }) {
+                    sortedWith(AlphanumComparator.FILTER)
+                } else {
+                    sortedWith(COMPARATOR)
+                }
+
+        private suspend fun <T> Collection<T>.plusAllIf(predicate: Boolean, item: suspend () -> Iterable<T>): List<T> =
+                plus(if (predicate) item() else emptyList())
+
+        private fun <T> Iterable<T>.filterIf(predicate: Boolean, predicate2: (T) -> Boolean): Iterable<T> =
+                if (predicate) filter(predicate2) else this
+    }
+}

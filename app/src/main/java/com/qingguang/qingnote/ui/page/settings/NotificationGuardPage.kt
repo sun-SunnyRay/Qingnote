@@ -219,7 +219,7 @@ fun NotificationGuardPage(navController: NavHostController) {
     if (showGuideDialog) {
         AlertDialog(
             onDismissRequest = { showGuideDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             tonalElevation = 0.dp,
             title = { Text("后台提醒防杀配置指南") },
             text = {

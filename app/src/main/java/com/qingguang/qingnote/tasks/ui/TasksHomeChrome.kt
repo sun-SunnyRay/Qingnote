@@ -269,7 +269,7 @@ fun TasksHomeActions(
     if (showDeleteListDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteListDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             tonalElevation = 0.dp,
             title = { Text(stringResource(R.string.delete_list)) },
             text = { Text(stringResource(R.string.delete_list_confirm, uiState.selectedTag.orEmpty())) },
@@ -771,7 +771,7 @@ private fun TaskSearchDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.cd_search_tasks)) },
         text = {
@@ -819,7 +819,7 @@ private fun TaskListNameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(title) },
         text = {
@@ -915,7 +915,7 @@ private fun TaskListPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.choose_list)) },
         text = {

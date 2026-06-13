@@ -664,7 +664,7 @@ private fun TaskBatchMoveDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.move_to_list)) },
         text = {
@@ -731,7 +731,7 @@ private fun BatchDateActionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.batch_date)) },
         text = {
@@ -764,7 +764,7 @@ private fun BatchPriorityDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.batch_priority)) },
         text = {
@@ -801,7 +801,7 @@ private fun BatchTagsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.batch_tags)) },
         text = {
@@ -1458,7 +1458,7 @@ private fun TaskEditorDialog(
     if (showUnsavedChangesDialog) {
         AlertDialog(
             onDismissRequest = { showUnsavedChangesDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             tonalElevation = 0.dp,
             title = { Text(stringResource(R.string.discard_changes_title)) },
             text = { Text(stringResource(R.string.discard_changes_msg)) },
@@ -1489,7 +1489,7 @@ private fun TaskEditorDialog(
     if (showExactAlarmDialog) {
         AlertDialog(
             onDismissRequest = { showExactAlarmDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             tonalElevation = 0.dp,
             title = { Text(stringResource(R.string.need_reminder_perm)) },
             text = { Text(stringResource(R.string.exact_alarm_msg)) },
@@ -1555,7 +1555,7 @@ private fun TaskEditorActionSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
     ) {
         Column(
             modifier = Modifier
@@ -2144,7 +2144,7 @@ private fun DateTimeEditorDialog(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
     ) {
         Column(
             modifier = Modifier
@@ -2284,7 +2284,7 @@ private fun DateTimeEditorDialog(
                     title = {},
                     showModeToggle = false,
                     colors = DatePickerDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = SaltTheme.colors.background,
                     ),
                 )
             }
@@ -2414,7 +2414,7 @@ private fun EditorTimePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         text = {
             TimePicker(state = state)
@@ -2494,12 +2494,12 @@ private fun RepeatEditorDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
-        Surface(color = MaterialTheme.colorScheme.surface) {
+        Surface(color = SaltTheme.colors.background) {
             Scaffold(
                 topBar = {
                     TopAppBar(
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
+                            containerColor = SaltTheme.colors.background,
                             titleContentColor = SaltTheme.colors.text,
                             navigationIconContentColor = SaltTheme.colors.text,
                             actionIconContentColor = SaltTheme.colors.highlight,
@@ -2659,7 +2659,7 @@ private fun RepeatEditorDialog(
                             tonalElevation = 0.dp,
                             properties = DialogProperties(usePlatformDefaultWidth = false),
                             colors = DatePickerDefaults.colors(
-                                containerColor = MaterialTheme.colorScheme.surface,
+                                containerColor = SaltTheme.colors.background,
                             ),
                         ) {
                             BoxWithConstraints(
@@ -2681,7 +2681,7 @@ private fun RepeatEditorDialog(
                                             title = { Text(stringResource(R.string.select_date), modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
                                             showModeToggle = false,
                                             colors = DatePickerDefaults.colors(
-                                                containerColor = MaterialTheme.colorScheme.surface,
+                                                containerColor = SaltTheme.colors.background,
                                             ),
                                         )
                                     }
@@ -2691,7 +2691,7 @@ private fun RepeatEditorDialog(
                                         title = { Text(stringResource(R.string.select_date), modifier = Modifier.padding(start = 24.dp, top = 16.dp)) },
                                         showModeToggle = false,
                                         colors = DatePickerDefaults.colors(
-                                            containerColor = MaterialTheme.colorScheme.surface,
+                                            containerColor = SaltTheme.colors.background,
                                         ),
                                     )
                                 }
@@ -3027,7 +3027,7 @@ private fun RemindersDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.reminders)) },
         text = {
@@ -3106,7 +3106,7 @@ private fun RemindersDialog(
                     DatePicker(
                         state = datePickerState,
                         colors = DatePickerDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.surface,
+                            containerColor = SaltTheme.colors.background,
                         ),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -3236,7 +3236,7 @@ private fun AbsoluteReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.specific_time)) },
         text = {
@@ -3248,7 +3248,7 @@ private fun AbsoluteReminderDialog(
                 DatePicker(
                     state = datePickerState,
                     colors = DatePickerDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = SaltTheme.colors.background,
                     ),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -3370,7 +3370,7 @@ private fun CustomRelativeReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.custom_notification)) },
         text = {
@@ -3539,7 +3539,7 @@ private fun CustomRelativeReminderDialog(
 
         AlertDialog(
             onDismissRequest = { showRecurringDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             tonalElevation = 0.dp,
             title = { Text(stringResource(R.string.repeat)) },
             text = {
@@ -3658,7 +3658,7 @@ private fun RandomReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.random_reminder)) },
         text = {
@@ -3795,7 +3795,7 @@ private fun InlineReminderSection(
                     color = SaltTheme.colors.text,
                 )
             },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             text = {
                 Column {
                     DialogChoice(text = stringResource(R.string.at_start_reminder)) {
@@ -4107,7 +4107,7 @@ private fun AttachmentsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(stringResource(R.string.attachments)) },
         text = {
@@ -4143,7 +4143,7 @@ private fun AttachmentsDialog(
     pendingDelete?.let { attachment ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = SaltTheme.colors.background,
             tonalElevation = 0.dp,
             title = { Text(stringResource(R.string.delete_attachment)) },
             text = { Text(stringResource(R.string.delete_attachment_confirm, attachment.name)) },
@@ -4266,7 +4266,7 @@ private fun TextValueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaltTheme.colors.background,
         tonalElevation = 0.dp,
         title = { Text(title) },
         text = {

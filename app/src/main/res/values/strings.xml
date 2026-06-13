@@ -671,4 +671,13 @@
     <string name="chip_subtasks">subtasks</string>
     <string name="chip_attachments">attachments</string>
     <string name="chip_reminders">reminders</string>
+
+    <!-- Foreground service for background reminder keepalive -->
+    <string name="fg_service_channel_name">Reminder Guardian</string>
+    <string name="fg_service_channel_desc">Keeps QingNote alive in background to ensure task reminders fire on time</string>
+    <string name="fg_service_notification_title">QingNote Reminder Guardian Active</string>
+    <string name="fg_service_notification_text">Ensuring your task reminders fire on time</string>
+    <string name="fg_service_setting_title">Background Reminder Guardian</string>
+    <string name="fg_service_setting_sub_on">Running (recommended for reliable reminders)</string>
+    <string name="fg_service_setting_sub_off">Not running (reminders may not fire if app is killed)</string>
 </resources>

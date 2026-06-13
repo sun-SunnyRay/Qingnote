@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
+import android.util.Log
 import com.qingguang.qingnote.tasks.scheduling.TaskAlarmScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -19,13 +20,15 @@ class TaskAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == TaskAlarmScheduler.ACTION_ALARM) {
+            Log.i(TAG, "Alarm received, processing task reminders...")
             val pendingResult = goAsync()
             val wakeLock = acquireWakeLock(context)
             CoroutineScope(Dispatchers.Default).launch {
                 try {
                     alarmScheduler.scheduleNextAlarm()
+                    Log.i(TAG, "Alarm processing completed successfully")
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e(TAG, "Failed to process alarm", e)
                 } finally {
                     wakeLock?.release()
                     pendingResult.finish()
@@ -44,8 +47,12 @@ class TaskAlarmReceiver : BroadcastReceiver() {
             wakeLock.acquire(30_000L) // 30秒超时，防止忘记释放
             wakeLock
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Failed to acquire wake lock", e)
             null
         }
+    }
+
+    companion object {
+        private const val TAG = "TaskAlarmReceiver"
     }
 }

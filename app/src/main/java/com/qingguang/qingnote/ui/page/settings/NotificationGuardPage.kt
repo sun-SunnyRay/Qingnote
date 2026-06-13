@@ -24,6 +24,7 @@ import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,6 +47,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import com.qingguang.qingnote.App
+import com.qingguang.qingnote.R
+import com.qingguang.qingnote.tasks.service.TaskReminderForegroundService
 import com.qingguang.qingnote.ui.page.router.debouncedPopBackStack
 import com.moriafly.salt.ui.Item
 import com.moriafly.salt.ui.ItemTitle
@@ -64,6 +67,7 @@ fun NotificationGuardPage(navController: NavHostController) {
     var hasNotificationPermission by remember { mutableStateOf(false) }
     var hasExactAlarmPermission by remember { mutableStateOf(false) }
     var isIgnoringBattery by remember { mutableStateOf(false) }
+    var isForegroundServiceRunning by remember { mutableStateOf(false) }
     var showGuideDialog by remember { mutableStateOf(false) }
 
     // 状态检测函数
@@ -82,6 +86,16 @@ fun NotificationGuardPage(navController: NavHostController) {
         // 3. 电池优化忽略状态检测
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         isIgnoringBattery = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+
+        // 4. 前台守护服务状态检测
+        isForegroundServiceRunning = try {
+            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            @Suppress("DEPRECATION")
+            activityManager.getRunningServices(Integer.MAX_VALUE)
+                .any { it.service.className == TaskReminderForegroundService::class.java.name }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     // 动态监听生命周期，在用户从系统设置返回时自动更新状态
@@ -203,7 +217,28 @@ fun NotificationGuardPage(navController: NavHostController) {
                     iconPainter = rememberVectorPainter(Icons.Outlined.Info),
                 )
 
-                // 4. 防杀后台配置指南
+                // 4. 前台保活服务开关
+                Item(
+                    onClick = {
+                        if (isForegroundServiceRunning) {
+                            TaskReminderForegroundService.stop(context)
+                        } else {
+                            TaskReminderForegroundService.start(context)
+                        }
+                        // 延迟后刷新状态
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            checkPermissions()
+                        }, 500)
+                    },
+                    text = context.getString(R.string.fg_service_setting_title),
+                    sub = if (isForegroundServiceRunning)
+                        context.getString(R.string.fg_service_setting_sub_on)
+                    else
+                        context.getString(R.string.fg_service_setting_sub_off),
+                    iconPainter = rememberVectorPainter(Icons.Outlined.Shield),
+                )
+
+                // 5. 防杀后台配置指南
                 Item(
                     onClick = { showGuideDialog = true },
                     text = "后台准时提醒防杀指南",

@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- Calendar integration -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
@@ -71,6 +73,12 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- Foreground keepalive service for reliable task reminders -->
+        <service
+            android:name="com.qingguang.qingnote.tasks.service.TaskReminderForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
 
     </application>
 

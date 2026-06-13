@@ -7,6 +7,7 @@ import com.qingguang.qingnote.db.repo.TagNoteRepo
 import com.qingguang.qingnote.tasks.TasksRepository
 import com.qingguang.qingnote.tasks.scheduling.TaskAlarmScheduler
 import com.qingguang.qingnote.tasks.scheduling.TaskReminderWorker
+import com.qingguang.qingnote.tasks.service.TaskReminderForegroundService
 import com.qingguang.qingnote.utils.SettingsPreferences
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
@@ -52,6 +53,9 @@ class App : Application(), Configuration.Provider {
 
         // 注册 WorkManager 定时检查，作为 AlarmManager 的后备
         TaskReminderWorker.enqueue(this)
+
+        // 启动前台保活服务，防止进程被杀后收不到闹钟广播
+        TaskReminderForegroundService.start(this)
 
         applicationScope.launch {
             SettingsPreferences.themeMode.collect {

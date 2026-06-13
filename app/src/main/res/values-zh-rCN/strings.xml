@@ -666,4 +666,13 @@
     <string name="chip_subtasks">子任务</string>
     <string name="chip_attachments">附件</string>
     <string name="chip_reminders">提醒</string>
+
+    <!-- 前台保活服务 -->
+    <string name="fg_service_channel_name">提醒守护</string>
+    <string name="fg_service_channel_desc">保持 QingNote 后台运行，确保任务提醒准时送达</string>
+    <string name="fg_service_notification_title">QingNote 提醒守护运行中</string>
+    <string name="fg_service_notification_text">正在守护您的任务提醒准时送达</string>
+    <string name="fg_service_setting_title">后台提醒守护服务</string>
+    <string name="fg_service_setting_sub_on">运行中 (推荐开启，保证后台提醒可靠送达)</string>
+    <string name="fg_service_setting_sub_off">未运行 (清后台后提醒可能无法送达)</string>
 </resources>

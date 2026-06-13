@@ -29,8 +29,8 @@ android {
         applicationId = "com.qingguang.qingnote"
         minSdk = 23
         targetSdk = 35
-        versionCode = 118
-        versionName = "1.1.8"
+        versionCode = 520
+        versionName = "5.2.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -186,6 +186,8 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     // ktor
     implementation(libs.ktor.client.core)
